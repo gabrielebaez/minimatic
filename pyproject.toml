@@ -1,7 +1,7 @@
 [project]
 name = "minimatic"
 version = "0.1.0"
-description = "Add your description here"
+description = "An experiment on language design and system integration. VM + DB + Server + Prelude."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []

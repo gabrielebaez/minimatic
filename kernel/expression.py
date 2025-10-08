@@ -12,7 +12,7 @@ class Expression:
     tail  : child expressions
     rule  : optional evaluation semantics
     value : cached evaluated result
-    t     : node type flag: 'atom', 'symbol', 'compound'
+    t     : node type flag: 'atom', 'symbol', 'compound', etc.
     attrs : frozen set of user attributes
     """
 

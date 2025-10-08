@@ -3,7 +3,8 @@
 An experiment on language design and system integration.
 VM + DB + Server + Prelude
 
-Core ideas:
+
+## Core ideas:
 
 1. Everything is an expression  
    - Every piece of data, every program, every structure—even the language’s own code—is represented as a symbolic expression (```head(arg₁, arg₂, …)```).  
@@ -21,37 +22,77 @@ Core ideas:
    - The vast python ecosystem is available as computable expressions.
 
 
-Prelude (integrated symbols and functions):
-- Data manipulation & Analysis
-    - Data Import
-    - Dataset representation
-    - Data Exploration/Transformation
-    - Data Export
-- Visualization & graphics
-- Machine learning
-    - Regression
-    - Classification
-    - Clustering
-    - Forecasting
-    - NLP
-    - CV
-    - LLMs
-- Images
-- Sound & video
-- Knowledge representation
-- UIs
-- Cloud deployment & parallel execution
+## A bit of syntax
+
+Function Application:
+
+- f(x) - standard call
+- f @ x - prefix application
+- x // f - postfix application
+- f /@ list - map over list
+
+Pattern Matching:
+
+- expr //. {pattern :> replacement} # replace patterns
+- x_     # matches anything, binds to x
+- x___   # matches sequence, binds to x
+- pattern /; condition  # conditional pattern
+- :>  # delayed replacement
+- ->  # immediate replacement
+
+Control:
+
+- if(condition, then, else)   # conditional
+- while(condition, body)      # loop
+- expr1; expr2; expr3         # sequence
 
 
-The Kernel:
-- Symbols (data)
-  - Env variables
-  - variables/data tructures
-  - Containers
-- Functions (behaviour)
-- Services (functions with interfaces)
-  - Interfaces: ways to expose functions
-    - rest
-    - gRPC
-    - ...
-- Kernels can connect together to form a pool and share resources/deploy services.
+# Core language functions
+
+## Arithmetic & Logic
+
+- add(a, b)           # +
+- sub(a, b)           # -
+- mul(a, b)           # *
+- div(a, b)           # /
+- mod(a, b)           # %
+- eq(a, b)            # ==
+- lt(a, b)            # <
+- gt(a, b)            # >
+- and(a, b)           # logical and
+- or(a, b)            # logical or
+- not(a)              # logical not
+
+## Control Flow
+
+- if(condition, then_expr, else_expr)
+- while(condition, body)
+- seq(expr1, expr2, ...)              # sequential execution
+
+## Data Structures
+
+- list(item1, item2, ...)
+- get(collection, index)
+- set(collection, index, value)
+- len(collection)
+- append(collection, item)
+
+## Variables & Scope
+
+- let(name, value, body)              # local binding
+- def(name, params, body)             # function definition
+- call(function, args...)
+
+## I/O & Conversion
+
+- print(value)
+- input()
+- str(value)
+- num(value)
+- type(value)
+
+## Iteration
+
+- map(function, collection)
+- filter(function, collection)
+- reduce(function, collection, initial)
