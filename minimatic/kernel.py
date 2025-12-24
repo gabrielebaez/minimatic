@@ -1,4 +1,4 @@
-from expression import Expression
+from minimatic.core.expression import Expression
 
 
 class Env:
