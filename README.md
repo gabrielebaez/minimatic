@@ -18,8 +18,9 @@ VM + DB + Server + Prelude
    - Once created, an expression’s value is fixed.  
    - This makes programs easier to reason about, parallelize, and test.
 
-4. Everything is integrated (built-in knowledge)  
-   - The vast python ecosystem is available as computable expressions.
+4. Everything is extensible  
+   - Minimatic is easily extensible through the definition of Symbols.
+   - A symbol is a simple class definition in python.
 
 
 ## A bit of syntax
@@ -33,66 +34,17 @@ Function Application:
 
 Pattern Matching:
 
-- expr //. {pattern :> replacement} # replace patterns
-- x_     # matches anything, binds to x
-- x___   # matches sequence, binds to x
-- pattern /; condition  # conditional pattern
-- :>  # delayed replacement
-- ->  # immediate replacement
+_		pattern standing for anything (“blank”)
+__		pattern standing for any sequence (“double blank”)
+x_		pattern named x
+a|b	pattern matching a or b
+matchQ(expr,pattern)		test whether expr matches a pattern
+cases(list,pattern)		find cases of a pattern in a list
+lhs -> rhs		         rule for transforming lhs into rhs
+expr /. lhs -> rhs		replace lhs by rhs in expr
 
 Control:
 
 - if(condition, then, else)   # conditional
 - while(condition, body)      # loop
 - expr1; expr2; expr3         # sequence
-
-
-# Core language functions
-
-## Arithmetic & Logic
-
-- add(a, b)           # +
-- sub(a, b)           # -
-- mul(a, b)           # *
-- div(a, b)           # /
-- mod(a, b)           # %
-- eq(a, b)            # ==
-- lt(a, b)            # <
-- gt(a, b)            # >
-- and(a, b)           # logical and
-- or(a, b)            # logical or
-- not(a)              # logical not
-
-## Control Flow
-
-- if(condition, then_expr, else_expr)
-- while(condition, body)
-- seq(expr1, expr2, ...)              # sequential execution
-
-## Data Structures
-
-- list(item1, item2, ...)
-- get(collection, index)
-- set(collection, index, value)
-- len(collection)
-- append(collection, item)
-
-## Variables & Scope
-
-- let(name, value, body)              # local binding
-- def(name, params, body)             # function definition
-- call(function, args...)
-
-## I/O & Conversion
-
-- print(value)
-- input()
-- str(value)
-- num(value)
-- type(value)
-
-## Iteration
-
-- map(function, collection)
-- filter(function, collection)
-- reduce(function, collection, initial)
