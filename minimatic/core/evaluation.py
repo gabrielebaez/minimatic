@@ -3,10 +3,18 @@ The Expression System is the core of the Minimatic computational engine,
 responsible for representing and manipulating symbolic expressions.
 """
 from typing import Any, Sequence
-from expression import BaseElement, Expression, Symbol
+from core.expression import BaseElement
 
 
-def evaluate(expr: BaseElement) -> BaseElement:
+class Context:
+    """
+    Represents the evaluation context for expressions.
+    """
+    def __init__(self, variables: dict[str, Any] | None = None):
+        self.variables = variables or {}
+
+
+def evaluate(expr: BaseElement, context: Context | None = None) -> BaseElement:
     """
     Evaluates a given expression.
 
@@ -17,4 +25,6 @@ def evaluate(expr: BaseElement) -> BaseElement:
         BaseElement: The evaluated expression.
     """
     # Placeholder for evaluation logic
-    return expr  # In a real implementation, this would be the evaluated result
+    if context is None:
+        context = Context()
+    return expr.evaluate(context)
