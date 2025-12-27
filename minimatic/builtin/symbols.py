@@ -19,6 +19,11 @@ class AtomSymbol(Expression):
         super().__init__(head=head, tail=value, attributes=(Atom,))
 
 
+class NumberSymbol(Expression):
+    def __init__(self, value: float):
+        super().__init__(head=Number, tail=value, attributes=(Atom,))
+
+
 class IntegerSymbol(Expression):
     def __init__(self, value: int):
         super().__init__(head=Integer, tail=value, attributes=(Atom,))

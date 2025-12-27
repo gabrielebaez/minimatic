@@ -8,6 +8,7 @@
 """
 
 from core.expression import Expression
+from core.evaluation import Context
 from builtin.symbols import Atom, Expr, Executable
 
 
@@ -21,7 +22,7 @@ class Let(Expression):
                          tail=(name, value, body), 
                          attributes=attributes)
 
-    def evaluate(self, scope):
+    def evaluate(self, context: Context):
         pass
 
 
@@ -34,7 +35,7 @@ class Block(Expression):
                          tail=(vars, body), 
                          attributes=attributes)
 
-    def evaluate(self, scope):
+    def evaluate(self, context: Context):
         pass
 
 
@@ -47,7 +48,7 @@ class Module(Expression):
                          tail=(vars, body), 
                          attributes=attributes)
 
-    def evaluate(self, scope):
+    def evaluate(self, context: Context):
         pass
 
 
@@ -61,5 +62,5 @@ class Def(Expression):
                          tail=(name, params, body), 
                          attributes=attributes)
 
-    def evaluate(self, scope):
+    def evaluate(self, context: Context):
         pass

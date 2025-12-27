@@ -16,7 +16,10 @@
 
 from core.expression import Expression, BaseElement
 from core.evaluation import Context
-from builtin.symbols import Integer, Number, Float, Executable, Atom
+from builtin.symbols import (
+    Integer, Number, Float, Executable, Atom,
+    IntegerSymbol, NumberSymbol, FloatSymbol
+)
 
 
 class Plus(Expression):
@@ -39,11 +42,11 @@ class Plus(Expression):
                 raise TypeError("Plus operation only supports Integer, Number, and Float symbols.")
 
         if all(element.head == Integer for element in self._tail):
-            return Expression(Integer, total, attributes=(Atom,))
+            return IntegerSymbol(total)
         elif all(element.head == Number for element in self._tail):
-            return Expression(Number, total, attributes=(Atom,))
+            return NumberSymbol(total)
         else:
-            return Expression(Float, total, attributes=(Atom,))
+            return FloatSymbol(total)
 
 
 class Subtract(Expression):
@@ -60,33 +63,25 @@ class Subtract(Expression):
         if not self._tail:
             raise ValueError("Subtract operation requires at least one argument.")
 
-        first_value = self._tail[0].tail
-        if self._tail[0].head == Integer:
-            total = first_value
-            for element in self._tail[1:]:
-                if element.head != Integer:
-                    raise TypeError("Subtract operation only supports Integer symbols.")
-                total -= element.tail
-            return Expression(Integer, total, attributes=(Atom,))
-
-        elif self._tail[0].head == Number:
-            total = first_value
-            for element in self._tail[1:]:
-                if element.head != Number:
-                    raise TypeError("Subtract operation only supports Number symbols.")
-                total -= element.tail
-            return Expression(Number, total, attributes=(Atom,))
-
-        elif self._tail[0].head == Float:
-            total = first_value
-            for element in self._tail[1:]:
-                if element.head != Float:
-                    raise TypeError("Subtract operation only supports Float symbols.")
-                total -= element.tail
-            return Expression(Float, total, attributes=(Atom,))
-        
-        else:
+        first_element = self._tail[0]
+        if first_element.head not in (Integer, Number, Float):
             raise TypeError("Subtract operation only supports Integer, Number, and Float symbols.")
+
+        result = first_element.tail
+
+        for element in self._tail[1:]:
+            value = element.tail
+            if element.head in (Integer, Number, Float):
+                result -= value
+            else:
+                raise TypeError("Subtract operation only supports Integer, Number, and Float symbols.")
+
+        if all(element.head == Integer for element in self._tail):
+            return IntegerSymbol(result)
+        elif all(element.head == Number for element in self._tail):
+            return NumberSymbol(result)
+        else:
+            return FloatSymbol(result)
 
 
 class Times(Expression):
@@ -113,11 +108,11 @@ class Times(Expression):
                 raise TypeError("Times operation only supports Integer, Number, and Float symbols.")
 
         if all(element.head == Integer for element in self._tail):
-            return Expression(Integer, product, attributes=(Atom,))
+            return IntegerSymbol(product)
         elif all(element.head == Number for element in self._tail):
-            return Expression(Number, product, attributes=(Atom,))
+            return NumberSymbol(product)
         else:
-            return Expression(Float, product, attributes=(Atom,))
+            return FloatSymbol(product)
 
 
 class LessThan(Expression):
@@ -140,9 +135,7 @@ class LessThan(Expression):
         _valid_types = (Integer, Number, Float)
 
         if head_a not in _valid_types or head_b not in _valid_types:
-            print(head_a, head_b)
-            return True
-            # raise TypeError("LessThan operation only supports Integer, Number, and Float symbols.")
+            raise TypeError("LessThan operation only supports Integer, Number, and Float symbols.")
         result = a_val.tail < b_val.tail
         return Expression("Boolean", result, attributes=(Atom,))
 
