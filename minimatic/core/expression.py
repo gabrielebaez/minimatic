@@ -1,5 +1,4 @@
-from typing import Any, Callable, Sequence
-from .attributes import Atom, Executable
+from typing import Any, Sequence
 from abc import ABC
 
 
@@ -14,6 +13,9 @@ class BaseElement(ABC):
     def get_attributes(self) -> dict:
         raise NotImplementedError("Subclasses should implement this method.")
     
+    def get_value(self) -> Any:
+        raise NotImplementedError("Subclasses should implement this method.")
+    
     def get_sort_key(self) -> str:
         raise NotImplementedError("Subclasses should implement this method.")
     
@@ -26,7 +28,7 @@ class BaseElement(ABC):
 
 class Expression(BaseElement):
     def __init__(self, 
-                 head: Any, 
+                 head: BaseElement, 
                  tail: tuple[BaseElement],
                  attributes: tuple[str]=()):
         self._head = head
@@ -34,7 +36,7 @@ class Expression(BaseElement):
         self._attributes = attributes
     
     def __repr__(self):
-        return f"Expression({self._head}, {self._tail}, attributes={self._attributes})"
+        return f"{self._head}({self._tail})"
     
     @property
     def get_head(self) -> BaseElement:
@@ -48,8 +50,12 @@ class Expression(BaseElement):
     def get_attributes(self) -> tuple[str]:
         return self._attributes
     
+    @property
+    def get_value(self) -> BaseElement | None:
+        return self._tail if self._tail else None
+    
     def evaluate(self):
-        if Executable in self._attributes:
+        if "Executable" in self._attributes:
             return self._head(self._tail).evaluate()
         else:
             return self

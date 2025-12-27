@@ -1,12 +1,3 @@
-# Predefined Symbol heads/types
-Integer = "Integer"
-Number = "Number"
-Float = "Float"
-Complex = "Complex"
-String = "String"
-Atom = "Atom"
-Expr = "Expr"
-Executable = "Executable"
 
 # Attribute names
 Protected = "Protected"

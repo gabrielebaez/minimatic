@@ -1,20 +1,16 @@
 from core.expression import Expression
-from core.attributes import Integer, Atom, Executable
+from builtin.symbols import IntegerSymbol, StringSymbol, Executable, Atom
 from builtin.arithmetic import LessThan as LT
-from builtin.arithmetic import Plus
+from builtin.arithmetic import Plus, Subtract
 
 
 if __name__ == "__main__":
-    a = Expression(Integer, 2, attributes=(Atom,))
-    b = Expression(Integer, 3, attributes=(Atom,))
-    d = Expression(LT, (b, a), attributes=(Executable,)).evaluate()
-    c = Expression(Plus, (a, b), attributes=(Executable,)).evaluate()
+    expr1 = Expression(LT, (IntegerSymbol(5), IntegerSymbol(10)), attributes=(Executable,))
+    expr2 = Expression(Plus, (IntegerSymbol(20), IntegerSymbol(22)), attributes=(Executable,))
+    expr3 = Expression(Subtract, (IntegerSymbol(15), IntegerSymbol(5)), attributes=(Executable,))
+    expr4 = Expression(StringSymbol, ("Hello, World!",), attributes=(Atom,))
 
-    big_a = Expression(Integer, 100, attributes=(Atom,))
-    big_b = Expression(Integer, 200, attributes=(Atom,))
-    big_c = Expression(Plus, (big_a, big_b), attributes=(Executable,)).evaluate()
-    print(a)  # Should print Integer(2)
-    print(b)  # Should print Integer(3)
-    print(d)  # Should print Boolean(True)
-    print(c)  # Should print Integer(5)
-    print(big_c)  # Should print Integer(300)
+    print(f"Expression 1: {expr1} evaluates to {expr1.evaluate()}")
+    print(f"Expression 2: {expr2} evaluates to {expr2.evaluate()}")
+    print(f"Expression 3: {expr3} evaluates to {expr3.evaluate()}")
+    print(f"Expression 4: {expr4} evaluates to {expr4.evaluate()}")
