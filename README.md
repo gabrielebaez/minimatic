@@ -4,6 +4,9 @@ An experiment on language design and system integration.
 VM + DB + Server + Prelude
 
 
+ALERT: Currently in very alpha version, thigs will move around a lot.
+
+
 ## Core ideas:
 
 1. Everything is an expression  
@@ -23,7 +26,7 @@ VM + DB + Server + Prelude
    - A symbol is a simple class definition in python.
 
 
-## A bit of syntax
+## A bit of (future) syntax
 
 Function Application:
 

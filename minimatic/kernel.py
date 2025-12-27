@@ -18,5 +18,5 @@ if __name__ == "__main__":
     print(f"Expression 2: {expr2} evaluates to {evaluate(expr2)}")
     print(f"Expression 3: {expr3} evaluates to {evaluate(expr3)}")
     print(f"Expression 4: {expr4} evaluates to {evaluate(expr4)}")
-    print(f"Expression 5: {expr4.attributeQ(Atom)}")
+    print(f"Expression 5: {expr4.has_attribute(Atom)}")
     print(f"a: {a}, b: {b}")

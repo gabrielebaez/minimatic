@@ -33,6 +33,7 @@ class Expression(BaseElement):
         self._tail = tail
         self._attributes = attributes
         self._hash: Optional[int] = None  # cached hash
+        
         # validation
         if "Executable" in self._attributes and not callable(self._head):
             raise TypeError("Executable expressions require a callable head.")
@@ -99,9 +100,6 @@ class Expression(BaseElement):
     def attributes(self) -> Tuple[str, ...]:
         return self._attributes
     
-    def attributeQ(self, attribute: BaseElement) -> bool:
-        return attribute in self._attributes
-
     # structural substitution
     def replace(
         self,

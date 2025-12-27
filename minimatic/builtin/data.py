@@ -6,6 +6,12 @@
 - set(collection, index, value)
 - len(collection)
 - append(collection, item)
+
+## Iteration
+
+- map(function, collection)
+- filter(function, collection)
+- reduce(function, collection, initial)
 """
 
 from core.expression import Expression

@@ -98,11 +98,7 @@ class Times(Expression):
         product = 1
         for element in self._tail:
             value = element.tail
-            if element.head == Integer:
-                product *= value
-            elif element.head == Number:
-                product *= value
-            elif element.head == Float:
+            if element.head in (Integer, Number, Float):
                 product *= value
             else:
                 raise TypeError("Times operation only supports Integer, Number, and Float symbols.")
