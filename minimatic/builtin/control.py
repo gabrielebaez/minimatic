@@ -15,9 +15,16 @@ class If(Expression):
                  condition: Expression, 
                  then_expr: Expression, 
                  else_expr: Expression):
-        super().__init__(head="If", 
+        super().__init__(head=If, 
                          tail=(condition, then_expr, else_expr), 
                          attributes=(Expr, Executable))
+        
+        def evaluate(self, context) -> Expression:
+            condition_expr = self._tail[0].evaluate(context)
+            if condition_expr.tail:  # Assuming the condition evaluates to a boolean-like value
+                return self._tail[1].evaluate(context)
+            else:
+                return self._tail[2].evaluate(context)
 
 
 class While(Expression):

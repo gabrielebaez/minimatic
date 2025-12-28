@@ -3,7 +3,7 @@ The Expression System is the core of the Minimatic computational engine,
 responsible for representing and manipulating symbolic expressions.
 """
 from typing import Any, Sequence
-from core.expression import BaseElement
+from core.base_element import BaseElement
 
 
 class Context:

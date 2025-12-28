@@ -1,20 +1,6 @@
-from typing import Any, Iterator, Optional, Sequence, Tuple, Callable
-from abc import ABC
-
-
-class BaseElement(ABC):
-
-    def head(self) -> str:
-        raise NotImplementedError("Subclasses should implement this method.")
-    
-    def tail(self) -> Sequence[Any]:
-        raise NotImplementedError("Subclasses should implement this method.")
-
-    def attributes(self) -> dict:
-        raise NotImplementedError("Subclasses should implement this method.")
-
-    def evaluate(self) -> Any:
-        raise NotImplementedError("Subclasses should implement this method.")
+from typing import Any, Iterator, Optional, Tuple, Callable
+from core.evaluation import Context
+from core.base_element import BaseElement
 
 
 class Expression(BaseElement):
@@ -26,7 +12,7 @@ class Expression(BaseElement):
     __slots__ = ("_head", "_tail", "_attributes", "_hash")
 
     def __init__(self, 
-                 head: BaseElement, 
+                 head: BaseElement|str, 
                  tail: tuple[BaseElement],
                  attributes: tuple[str]=()):
         self._head = head
@@ -119,7 +105,38 @@ class Expression(BaseElement):
     
     # evaluation
     def evaluate(self, context: Any = None) -> BaseElement:
-        if "Executable" in self._attributes:
-            return self._head(self._tail).evaluate(context)
-        else:
+        """
+        Evaluate the expression based on its head and attributes.
+
+        - If "Hold" in attributes: return unevaluated
+        - If head is callable and "Executable" in attributes:
+            evaluate tail and call head with evaluated arguments
+        - If head is str and "Executable" in attributes:
+            evaluate tail and return new expression with evaluated tail
+        - Otherwise: return unevaluated
+        """
+        # If Hold attribute is present, return unevaluated
+        if self.has_attribute("Hold"):
             return self
+
+        # If Executable is not present, return unevaluated
+        if not self.has_attribute("Executable"):
+            return self
+
+        # Evaluate tail elements recursively
+        evaluated_tail = tuple(
+            t.evaluate(context) if isinstance(t, Expression) else t
+            for t in self._tail
+        )
+
+        # If head is callable, call it with evaluated arguments
+        if callable(self._head):
+            try:
+                result = self._head(*evaluated_tail)
+                return result
+            except Exception:
+                # If evaluation fails, return expression with evaluated tail
+                return self.replace(tail=evaluated_tail)
+
+        # If head is str or other BaseElement, return expression with evaluated tail
+        return self.replace(tail=evaluated_tail)

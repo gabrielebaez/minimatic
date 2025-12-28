@@ -2,16 +2,16 @@
 ## Arithmetic & Logic
 
 - Plus(a, b, ...)      # +
-- sub(a, b, ...)      # -
-- mul(a, b, ...)      # *
-- div(a, b, ...)      # /
-- mod(a, b)           # %
-- Eq(a, b)            # ==
-- LessThan(a, b)      # <
-- GreaterThan(a, b)   # >
-- And(a, b)           # logical and
-- Or(a, b)            # logical or
-- Not(a)              # logical not
+- Subtract(a, b, ...)  # -
+- Times(a, b, ...)     # *
+- div(a, b, ...)       # /
+- mod(a, b)            # %
+- Eq(a, b)             # ==
+- LessThan(a, b)       # <
+- GreaterThan(a, b)    # >
+- And(a, b)            # logical and
+- Or(a, b)             # logical or
+- Not(a)               # logical not
 """
 
 from core.expression import Expression, BaseElement
@@ -143,8 +143,8 @@ class GreaterThan(Expression):
     Supports Integer, Number, and Float symbols.
     Returns a Boolean expression.
     """
-    def __init__(self, tail: tuple[BaseElement]):
-        super().__init__(head=GreaterThan, tail=tail, attributes=(Executable,))
+    def __init__(self, *tail: BaseElement):
+        super().__init__(head=GreaterThan, *tail, attributes=(Executable,))
 
     def evaluate(self, _) -> Expression:
         a_val = self._tail[0]
