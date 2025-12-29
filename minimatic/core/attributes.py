@@ -1,4 +1,8 @@
 
+# Symbol types
+Atom = "Atom"
+Function = "Function"
+
 # Attribute names
 Protected = "Protected"
 ReadProtected = "ReadProtected"

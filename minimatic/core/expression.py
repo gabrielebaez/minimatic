@@ -1,6 +1,7 @@
 from typing import Any, Iterator, Optional, Tuple, Callable
 from core.evaluation import Context
 from core.base_element import BaseElement
+from core.attributes import Atom, HoldAll
 
 
 class Expression(BaseElement):
@@ -13,19 +14,20 @@ class Expression(BaseElement):
 
     def __init__(self, 
                  head: BaseElement|str, 
-                 tail: tuple[BaseElement],
+                 *tail: BaseElement,
                  attributes: tuple[str]=()):
         self._head = head
         self._tail = tail
         self._attributes = attributes
         self._hash: Optional[int] = None  # cached hash
-        
-        # validation
-        if "Executable" in self._attributes and not callable(self._head):
-            raise TypeError("Executable expressions require a callable head.")
-    
-    def __repr__(self):
-        return f"{self._head}({self._tail})"
+
+    def __repr__(self) -> str:
+        tail_str = ", ".join(repr(t) for t in self._tail)
+        return f"{self._head}({tail_str})"
+
+    def __str__(self) -> str:
+        """User-friendly string representation."""
+        return repr(self)
 
     # sequence protocol
     def __iter__(self) -> Iterator[BaseElement]:
@@ -62,15 +64,15 @@ class Expression(BaseElement):
             return self
         return Expression(
             self._head,
-            self._tail,
-            self._attributes + (attr,),
+            *self._tail,
+            attributes=self._attributes + (attr,),
         )
 
     def remove_attribute(self, attr: str) -> "Expression":
         return Expression(
             self._head,
-            self._tail,
-            tuple(a for a in self._attributes if a != attr),
+            *self._tail,
+            attributes=tuple(a for a in self._attributes if a != attr),
         )
 
     # accessors
@@ -85,7 +87,7 @@ class Expression(BaseElement):
     @property
     def attributes(self) -> Tuple[str, ...]:
         return self._attributes
-    
+
     # structural substitution
     def replace(
         self,
@@ -93,50 +95,50 @@ class Expression(BaseElement):
         tail: Optional[Tuple[BaseElement, ...]] = None,
         attributes: Optional[Tuple[str, ...]] = None,
     ) -> "Expression":
+        new_head = head if head is not None else self._head
+        new_tail = tail if tail is not None else self._tail
+        new_attributes = attributes if attributes is not None else self._attributes
+
         return Expression(
-            head if head is not None else self._head,
-            tail if tail is not None else self._tail,
-            attributes if attributes is not None else self._attributes,
+            new_head,
+            *new_tail,
+            attributes=new_attributes,
         )
 
     def map(self, fn: Callable[[BaseElement], BaseElement]) -> "Expression":
         """Return a new expression whose tail is mapped through `fn`."""
         return self.replace(tail=tuple(fn(t) for t in self._tail))
     
+    # Helper function
+    def evaluate_tail(self, context: Context):
+        return tuple(
+            t.evaluate(context) if isinstance(t, Expression) else t
+            for t in self._tail)
+
+
     # evaluation
     def evaluate(self, context: Any = None) -> BaseElement:
         """
         Evaluate the expression based on its head and attributes.
-
         - If "Hold" in attributes: return unevaluated
-        - If head is callable and "Executable" in attributes:
-            evaluate tail and call head with evaluated arguments
-        - If head is str and "Executable" in attributes:
-            evaluate tail and return new expression with evaluated tail
-        - Otherwise: return unevaluated
+        - If "Atom" in attributes: return unevaluated
+        - If Head is BaseElement: Evaluate head, and return -> evaluated_head(evaluated_tail)
+        - Else: return head(evaluated_tail)
         """
-        # If Hold attribute is present, return unevaluated
-        if self.has_attribute("Hold"):
+        # If HoldAll attribute is present, return unevaluated
+        if self.has_attribute(HoldAll):
             return self
 
-        # If Executable is not present, return unevaluated
-        if not self.has_attribute("Executable"):
+        # If Atom attribute is present, return unevaluated
+        if self.has_attribute(Atom):
             return self
 
         # Evaluate tail elements recursively
-        evaluated_tail = tuple(
-            t.evaluate(context) if isinstance(t, Expression) else t
-            for t in self._tail
-        )
+        evaluated_tail = self.evaluate_tail(context)
 
-        # If head is callable, call it with evaluated arguments
-        if callable(self._head):
-            try:
-                result = self._head(*evaluated_tail)
-                return result
-            except Exception:
-                # If evaluation fails, return expression with evaluated tail
-                return self.replace(tail=evaluated_tail)
-
-        # If head is str or other BaseElement, return expression with evaluated tail
-        return self.replace(tail=evaluated_tail)
+        # If head BaseElement, evaluate it and return expression with evaluated tail
+        if isinstance(self._head, BaseElement):
+            evaluated_head = self._head.evaluate()
+            return self.replace(head=evaluated_head, tail=evaluated_tail)
+        else:
+            return self.replace(tail=evaluated_tail)

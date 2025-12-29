@@ -24,5 +24,3 @@ class BaseElement(ABC):
 
     def evaluate(self) -> Any:
         raise NotImplementedError("Subclasses should implement this method.")
-
-
