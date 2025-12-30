@@ -1,305 +1,277 @@
-from typing import Any
+from copy import copy, deepcopy
 from core.expression import Expression
-from core.evaluation import Context
-from core.attributes import Atom
-from builtin.arithmetic import Plus
+from core.base_element import BaseElement
 
+# Assuming these exist or are mocked
+class Integer(BaseElement):
+    def __init__(self, value):
+        self.value = value
+    def evaluate(self, context=None):
+        return self
+    def __repr__(self):
+        return str(self.value)
+    def __eq__(self, other):
+        return isinstance(other, Integer) and self.value == other.value
+    def __hash__(self):
+        return hash(self.value)
 
-# ============================================================================
-# 1. BASIC CONSTRUCTION
-# ============================================================================
+class Variable(BaseElement):
+    def __init__(self, name):
+        self.name = name
+    def evaluate(self, context=None):
+        return self
+    def __repr__(self):
+        return self.name
+    def __eq__(self, other):
+        return isinstance(other, Variable) and self.name == other.name
+    def __hash__(self):
+        return hash(self.name)
 
-# Simple expressions with string heads
-add_expr = Expression("Plus", 2, 3)
-multiply_expr = Expression("Times", 5, 4)
-
-# Nested expressions
-nested = Expression("Plus", Expression("Times", 2, 3), 4)
-
-# Expression with no tail
-symbol = Expression("x")
-
-print("=== CONSTRUCTION ===")
-print(f"add_expr: {add_expr}")
-print(f"multiply_expr: {multiply_expr}")
-print(f"nested: {nested}")
-print(f"symbol: {symbol}")
-
-
-# ============================================================================
-# 2. STRING REPRESENTATIONS
-# ============================================================================
-
-print("\n=== STRING REPRESENTATIONS ===")
-print(f"repr(add_expr): {repr(add_expr)}")
-print(f"str(add_expr): {str(add_expr)}")
-print(f"repr(nested): {repr(nested)}")
-
+class MockContext:
+    pass
 
 # ============================================================================
-# 3. SEQUENCE PROTOCOL
+# BASIC CONSTRUCTION
 # ============================================================================
 
-print("\n=== SEQUENCE PROTOCOL ===")
+# Simple expression: Plus(1, 2)
+expr1 = Expression("Plus", Integer(1), Integer(2))
+print(expr1)  # Plus(1, 2)
 
-# __len__: get number of arguments
-print(f"len(add_expr): {len(add_expr)}")  # 2
-print(f"len(symbol): {len(symbol)}")      # 0
+# Nested expression: Times(2, Plus(3, 4))
+expr2 = Expression("Times", Integer(2), 
+                   Expression("Plus", Integer(3), Integer(4)))
+print(expr2)  # Times(2, Plus(3, 4))
 
-# __getitem__: access arguments by index
-print(f"add_expr[0]: {add_expr[0]}")      # 2
-print(f"add_expr[1]: {add_expr[1]}")      # 3
-
-# __iter__: iterate over arguments
-print(f"Elements in add_expr: {list(add_expr)}")  # [2, 3]
-
-# Iterate over nested expression
-print(f"Elements in nested: {list(nested)}")  # [Plus(2, 3), 4]
-
+# Expression with no arguments
+expr3 = Expression("Pi")
+print(expr3)  # Pi()
 
 # ============================================================================
-# 4. EQUALITY AND HASHING
+# SEQUENCE PROTOCOL (iteration, length, indexing)
 # ============================================================================
 
-print("\n=== EQUALITY AND HASHING ===")
+expr = Expression("Plus", Integer(1), Integer(2), Integer(3))
 
-expr1 = Expression("Plus", 2, 3)
-expr2 = Expression("Plus", 2, 3)
-expr3 = Expression("Plus", 3, 2)
-expr4 = Expression("Times", 2, 3)
+# __len__: Get number of arguments
+print(len(expr))  # 3
 
-print(f"expr1 == expr2: {expr1 == expr2}")  # True (same structure)
-print(f"expr1 == expr3: {expr1 == expr3}")  # False (different argument order)
-print(f"expr1 == expr4: {expr1 == expr4}")  # False (different head)
+# __getitem__: Access individual arguments by index
+print(expr[0])  # 1
+print(expr[1])  # 2
+print(expr[-1])  # 3 (negative indexing supported)
 
-# Use in sets and dicts (via hashing)
-expr_set = {expr1, expr2, expr3}
-print(f"Set of 3 expressions: {len(expr_set)} unique")  # 2 unique (expr1 and expr2 are identical)
+# __iter__: Iterate over arguments
+for arg in expr:
+    print(arg)  # 1, then 2, then 3
 
-expr_dict = {expr1: "addition", expr4: "multiplication"}
-print(f"expr_dict[expr2]: {expr_dict[expr2]}")  # "addition" (expr2 hashes to same as expr1)
-
-
-# ============================================================================
-# 5. ATTRIBUTE MANIPULATION
-# ============================================================================
-
-print("\n=== ATTRIBUTE MANIPULATION ===")
-
-# Create expression without attributes
-plain_expr = Expression("f", 1, 2)
-print(f"plain_expr.attributes: {plain_expr.attributes}")  # ()
-
-# Check for attribute
-print(f"plain_expr.has_attribute('Hold'): {plain_expr.has_attribute('Hold')}")  # False
-
-# Add an attribute
-held_expr = plain_expr.add_attribute("Hold")
-print(f"held_expr.attributes: {held_expr.attributes}")  # ('Hold',)
-print(f"held_expr.has_attribute('Hold'): {held_expr.has_attribute('Hold')}")  # True
-
-# Add multiple attributes
-exec_held = held_expr.add_attribute("Executable")
-print(f"exec_held.attributes: {exec_held.attributes}")  # ('Hold', 'Executable')
-
-# Adding duplicate attribute returns self (no change)
-exec_held_2 = exec_held.add_attribute("Executable")
-print(f"exec_held is exec_held_2: {exec_held is exec_held_2}")  # True
-
-# Remove an attribute
-no_hold = exec_held.remove_attribute("Hold")
-print(f"no_hold.attributes: {no_hold.attributes}")  # ('Executable',)
-
-# Remove non-existent attribute (no error, just returns new expression)
-still_no_hold = no_hold.remove_attribute("Hold")
-print(f"still_no_hold.attributes: {still_no_hold.attributes}")  # ('Executable',)
-
+# __contains__: Check if argument exists
+print(Integer(2) in expr)  # True
+print(Integer(5) in expr)  # False
 
 # ============================================================================
-# 6. PROPERTY ACCESSORS
+# EQUALITY AND HASHING
 # ============================================================================
 
-print("\n=== PROPERTY ACCESSORS ===")
+expr_a = Expression("Plus", Integer(1), Integer(2))
+expr_b = Expression("Plus", Integer(1), Integer(2))
+expr_c = Expression("Plus", Integer(2), Integer(1))
 
-example = Expression("MyFunc", "a", "b", "c", attributes=("Attr1", "Attr2"))
+# __eq__: Check equality
+print(expr_a == expr_b)  # True (same structure and values)
+print(expr_a == expr_c)  # False (different argument order)
 
-print(f"example.head: {example.head}")           # MyFunc
-print(f"example.tail: {example.tail}")           # ('a', 'b', 'c')
-print(f"example.attributes: {example.attributes}")  # ('Attr1', 'Attr2')
+# __hash__: Use as dictionary key or in sets
+expr_dict = {expr_a: "my_expression"}
+print(expr_dict[expr_b])  # "my_expression" (expr_a and expr_b hash the same)
 
+unique_exprs = {expr_a, expr_b, expr_c}
+print(len(unique_exprs))  # 2 (expr_a and expr_b are considered the same)
 
 # ============================================================================
-# 7. STRUCTURAL SUBSTITUTION (replace)
+# COPYING
 # ============================================================================
 
-print("\n=== STRUCTURAL SUBSTITUTION ===")
+original = Expression("Times", Integer(2), Integer(3))
 
-original = Expression("Plus", 10, 20, attributes=("Attr1",))
+# __copy__: Shallow copy
+shallow = copy(original)
+print(shallow == original)  # True
+print(shallow is original)  # False (different objects)
 
-# Replace head only
-replaced_head = original.replace(head="Minus")
-print(f"replaced_head: {replaced_head}")  # Minus(10, 20)
-print(f"replaced_head.attributes: {replaced_head.attributes}")  # ('Attr1',)
+# __deepcopy__: Deep copy (useful for nested expressions)
+nested = Expression("Plus", Integer(1), 
+                   Expression("Times", Integer(2), Integer(3)))
+deep_copy = deepcopy(nested)
+print(deep_copy == nested)  # True
+print(deep_copy is nested)  # False
 
-# Replace tail only
-replaced_tail = original.replace(tail=(5, 15))
-print(f"replaced_tail: {replaced_tail}")  # Plus(5, 15)
-print(f"replaced_tail.attributes: {replaced_tail.attributes}")  # ('Attr1',)
+# Handles circular references gracefully
+memo = {}
+deep_copy_with_memo = deepcopy(nested, memo)
+print(id(nested) in memo)  # True
 
-# Replace attributes only
-replaced_attrs = original.replace(attributes=("NewAttr",))
-print(f"replaced_attrs: {replaced_attrs}")  # Plus(10, 20)
-print(f"replaced_attrs.attributes: {replaced_attrs.attributes}")  # ('NewAttr',)
+# ============================================================================
+# ATTRIBUTE MANIPULATION
+# ============================================================================
 
-# Replace everything
-replaced_all = original.replace(
+expr = Expression("Sin", Variable("x"))
+
+# has_attribute: Check if attribute exists
+print(expr.has_attribute("HoldAll"))  # False
+
+# add_attribute: Add attribute (returns new Expression)
+expr_with_hold = expr.add_attribute("HoldAll")
+print(expr_with_hold.has_attribute("HoldAll"))  # True
+print(expr.has_attribute("HoldAll"))  # False (original unchanged)
+
+# Multiple attributes
+expr_multi = expr.add_attribute("HoldAll").add_attribute("Protected")
+print(expr_multi.attributes)  # ("HoldAll", "Protected")
+
+# remove_attribute: Remove attribute (returns new Expression)
+expr_removed = expr_multi.remove_attribute("HoldAll")
+print(expr_removed.attributes)  # ("Protected",)
+
+# Adding duplicate attribute does nothing
+expr_again = expr_with_hold.add_attribute("HoldAll")
+print(expr_again is expr_with_hold)  # True (returns same object)
+
+# ============================================================================
+# PROPERTY ACCESSORS
+# ============================================================================
+
+expr = Expression("Power", Integer(2), Integer(3), attributes=("Protected",))
+
+# head: Access the function/operator
+print(expr.head)  # "Power"
+
+# tail: Access all arguments as tuple
+print(expr.tail)  # (Integer(2), Integer(3))
+
+# attributes: Access attribute tuple
+print(expr.attributes)  # ("Protected",)
+
+# ============================================================================
+# STRUCTURAL REPLACEMENT
+# ============================================================================
+
+original = Expression("Plus", Integer(1), Integer(2))
+
+# replace: Modify head
+new_expr = original.replace(head="Times")
+print(new_expr)  # Times(1, 2)
+print(original)  # Plus(1, 2) (unchanged)
+
+# replace: Modify tail
+new_expr = original.replace(tail=(Integer(10), Integer(20)))
+print(new_expr)  # Plus(10, 20)
+
+# replace: Modify attributes
+new_expr = original.replace(attributes=("HoldAll",))
+print(new_expr.attributes)  # ("HoldAll",)
+
+# replace: Modify multiple components at once
+new_expr = original.replace(
     head="Times",
-    tail=(2, 3),
-    attributes=("Attr1", "Attr2")
+    tail=(Integer(5), Integer(6)),
+    attributes=("Protected",)
 )
-print(f"replaced_all: {replaced_all}")  # Times(2, 3)
-print(f"replaced_all.attributes: {replaced_all.attributes}")  # ('Attr1', 'Attr2')
-
-
-# ============================================================================
-# 8. MAPPING (map)
-# ============================================================================
-
-print("\n=== MAPPING ===")
-
-expr = Expression("List", 1, 2, 3)
-
-# Double each element
-doubled = expr.map(lambda x: x * 2)
-print(f"doubled: {doubled}")  # List(2, 4, 6)
-
-# Square each element
-squared = expr.map(lambda x: x ** 2)
-print(f"squared: {squared}")  # List(1, 4, 9)
-
-# Map with nested expressions
-nested_expr = Expression("Container",
-                         Expression("Item", 1),
-                         Expression("Item", 2))
-
-# Map to extract just the head
-heads_only = nested_expr.map(lambda x: x.head if isinstance(x, Expression) else x)
-print(f"heads_only: {heads_only}")  # Container(Item, Item)
-
+print(new_expr)  # Times(5, 6)
+print(new_expr.attributes)  # ("Protected",)
 
 # ============================================================================
-# 9. EVALUATION (evaluate)
+# MAPPING OVER TAIL
 # ============================================================================
 
-print("\n=== EVALUATION ===")
+expr = Expression("Plus", Integer(1), Integer(2), Integer(3))
 
-# 9a. Hold attribute - prevents evaluation
-hold_expr = Expression("Plus", 2, 3, attributes=("Hold",))
-result = hold_expr.evaluate()
-print(f"Hold expression evaluates to itself: {result is hold_expr}")  # True
+# map: Apply function to each argument
+doubled = expr.map(lambda x: x if isinstance(x, Variable) 
+                            else Integer(x.value * 2))
+print(doubled)  # Plus(2, 4, 6)
+print(expr)    # Plus(1, 2, 3) (unchanged)
 
-# 9b. No Executable attribute - returns unevaluated
-plain = Expression("Plus", 2, 3)  # No "Executable" attribute
-result = plain.evaluate()
-print(f"Non-executable expression: {result is plain}")  # True
+# map with nested expressions
+expr = Expression("List", 
+                  Expression("Plus", Integer(1), Integer(2)),
+                  Expression("Times", Integer(3), Integer(4)))
 
-# 9c. Callable head with Executable attribute
-def add(*args):
-    return sum(args)
+# Increment each nested expression's first argument
+def increment_first_arg(elem):
+    if isinstance(elem, Expression):
+        new_tail = (Integer(elem[0].value + 1),) + elem.tail[1:]
+        return elem.replace(tail=new_tail)
+    return elem
 
-exec_expr = Expression(add, 2, 3, attributes=("Executable",))
-result = exec_expr.evaluate()
-print(f"Callable head result: {result}")  # 5
-
-# 9d. Nested evaluation with Executable
-def multiply(x, y):
-    return x * y
-
-inner_expr = Expression(add, 1, 2, attributes=("Executable",))
-outer_expr = Expression(multiply, inner_expr, 10, attributes=("Executable",))
-result = outer_expr.evaluate()
-print(f"Nested evaluation: {result}")  # 30 (add(1,2) = 3, multiply(3, 10) = 30)
-
-# 9e. String head with Executable (evaluates tail, returns expression)
-exec_string_head = Expression("Print", 
-                              Expression(add, 5, 5, attributes=("Executable",)),
-                              attributes=("Executable",))
-result = exec_string_head.evaluate()
-print(f"String head result: {result}")  # Print(10)
-
-# 9f. Evaluation failure gracefully degrades
-def faulty_op(x):
-    raise ValueError("Oops!")
-
-faulty = Expression(faulty_op, 10, attributes=("Executable",))
-result = faulty.evaluate()
-print(f"Failed evaluation returns expression: {isinstance(result, Expression)}")  # True
-
+result = expr.map(increment_first_arg)
+print(result)  # List(Plus(2, 2), Times(4, 4))
 
 # ============================================================================
-# 10. VALIDATION (Executable attribute requires callable head)
+# EVALUATION
 # ============================================================================
 
-print("\n=== VALIDATION ===")
+context = MockContext()
 
-# This raises TypeError
+# evaluate: Atom attribute prevents evaluation
+atom_expr = Expression("Plus", Integer(1), Integer(2), attributes=("Atom",))
+result = atom_expr.evaluate(context)
+print(result == atom_expr)  # True (returned unevaluated)
+
+# evaluate: HoldAll attribute prevents evaluation
+held_expr = Expression("Sin", Variable("x"), attributes=("HoldAll",))
+result = held_expr.evaluate(context)
+print(result == held_expr)  # True (returned unevaluated)
+
+# evaluate: Normal expression (without attributes)
+expr = Expression("Plus", Integer(1), Integer(2))
+result = expr.evaluate(context)
+# Result depends on context implementation; tail is evaluated
+
+# evaluate: Expression with BaseElement head
+inner_expr = Expression("Plus", Integer(1), Integer(2))
+compound = Expression(inner_expr, Integer(3))
+result = compound.evaluate(context)
+# Head and tail are both evaluated
+
+# ============================================================================
+# ERROR HANDLING
+# ============================================================================
+
+# Invalid head type
 try:
-    bad_expr = Expression("NotCallable", 1, 2, attributes=("Executable",))
+    Expression(123, Integer(1))  # TypeError: head must be BaseElement or str
 except TypeError as e:
-    print(f"Constructor validation: {e}")
+    print(f"Error: {e}")
 
-# This also raises TypeError when using replace
+# Invalid tail element type
 try:
-    expr = Expression("SomeHead", 1, 2)
-    bad_replace = expr.replace(head="NotCallable", attributes=("Executable",))
+    Expression("Plus", Integer(1), "invalid")  # TypeError in runtime usage
 except TypeError as e:
-    print(f"Replace validation: {e}")
-
-
-# ============================================================================
-# 11. IMMUTABILITY DEMONSTRATION
-# ============================================================================
-
-print("\n=== IMMUTABILITY ===")
-
-original = Expression("f", 1, 2)
-modified = original.add_attribute("MyAttr")
-
-print(f"original is modified: {original is modified}")  # False
-print(f"original.attributes: {original.attributes}")  # ()
-print(f"modified.attributes: {modified.attributes}")  # ('MyAttr',)
-
-# Tail and head are not modified
-print(f"original.tail: {original.tail}")  # (1, 2)
-print(f"modified.tail: {modified.tail}")  # (1, 2)
-
+    print(f"Error: {e}")
 
 # ============================================================================
-# 12. COMPLEX EXAMPLE: SYMBOLIC MATH EXPRESSION
+# CHAINING OPERATIONS
 # ============================================================================
 
-print("\n=== COMPLEX EXAMPLE: SYMBOLIC MATH ===")
+# Combine multiple operations
+expr = (Expression("Plus", Integer(1), Integer(2))
+        .add_attribute("Protected")
+        .add_attribute("HoldAll")
+        .replace(tail=(Integer(5), Integer(6)))
+        .remove_attribute("Protected"))
 
-# Build: (2 * 3) + (4 * 5)
-two_times_three = Expression("Times", 2, 3, attributes=("Executable",))
-four_times_five = Expression("Times", 4, 5, attributes=("Executable",))
-full_expr = Expression("Plus", two_times_three, four_times_five, attributes=("Executable",))
+print(expr)  # Plus(5, 6)
+print(expr.attributes)  # ("HoldAll",)
 
-print(f"Expression: {full_expr}")
+# ============================================================================
+# STRING REPRESENTATION
+# ============================================================================
 
-# Define actual operations
-import operator
-expr_with_ops = Expression(
-    operator.add,
-    Expression(operator.mul, 2, 3, attributes=("Executable",)),
-    Expression(operator.mul, 4, 5, attributes=("Executable",)),
-    attributes=("Executable",)
-)
+expr = Expression("Function", Variable("x"), Integer(42))
 
-result = expr_with_ops.evaluate()
-print(f"Evaluated result: {result}")  # 26
+# __repr__: Machine-readable representation
+print(repr(expr))  # Function(x, 42)
 
-# Hold one part for inspection
-held_version = full_expr.add_attribute("Hold")
-held_result = held_version.evaluate()
-print(f"Held expression returns itself: {held_result is held_version}")  # True
+# __str__: User-friendly representation (same as __repr__ here)
+print(str(expr))  # Function(x, 42)

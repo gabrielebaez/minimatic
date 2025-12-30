@@ -36,7 +36,7 @@ class Plus(Expression):
 
     def evaluate(self, context: Context = None) -> BaseElement:
         # First, evaluate tail elements
-        evaluated_tail = self.evaluate_tail()
+        evaluated_tail = self.evaluate_tail(context)
 
         total = 0
         result_type = None
