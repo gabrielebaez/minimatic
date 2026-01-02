@@ -9,19 +9,16 @@
 - Eq(a, b)             # ==
 - LessThan(a, b)       # <
 - GreaterThan(a, b)    # >
-- And(a, b)            # logical and
+- And(a, b)            # logical an
 - Or(a, b)             # logical or
 - Not(a)               # logical not
 """
-
-from core.expression import Expression
-from core.evaluation import Context
-from core.attributes import Function, Atom
-from builtin.symbols import (IntegerSymbol, NumberSymbol, FloatSymbol)
-from core.base_element import BaseElement
+from core.base_element import BaseElement, Context, Expression, Literal
+from builtin.heads import Integer, Number, Float
+from typing import Optional
 
 
-NUMERIC = ("Integer", "Number", "Float")
+NUMERIC = (Integer, Number, Float)
 
 
 class Plus(Expression):
@@ -32,9 +29,9 @@ class Plus(Expression):
     Returns an Expression with the appropriate numeric type.
     """
     def __init__(self, *tail: BaseElement):
-        super().__init__("Plus", *tail, attributes=(Function,))
+        super().__init__("Plus", *tail)
 
-    def evaluate(self, context: Context = None) -> BaseElement:
+    def evaluate(self, context: Optional[Context]) -> Literal:
         # First, evaluate tail elements
         evaluated_tail = self.evaluate_tail(context)
 
@@ -43,40 +40,32 @@ class Plus(Expression):
 
         for element in evaluated_tail:
             # Extract numeric value from evaluated element
-            if isinstance(element, Expression):
+            if isinstance(element, Literal):
                 head = element.head
+                value = element.value
 
-                if len(element.tail) > 0:
-                    value = element.tail[0]
-
-                    if head == "Integer":
-                        total += int(value)
-                        result_type = "Integer"
-                    elif head == "Number":
-                        total += float(value)
-                        if result_type != "Float":
-                            result_type = "Number"
-                    elif head == "Float":
-                        total += float(value)
-                        result_type = "Float"
-                    else:
-                        raise TypeError(f"Plus does not support type '{head}'.")
+                if head == Integer:
+                    total += int(value)
+                    result_type = "Integer"
+                elif head == Number:
+                    total += float(value)
+                    if result_type != "Float":
+                        result_type = "Number"
+                elif head == Float:
+                    total += float(value)
+                    result_type = "Float"
                 else:
-                    raise ValueError(f"Invalid numeric expression: {element}")
+                    raise TypeError(f"Plus does not support type '{head}'.")
             else:
-                # Handle raw numeric values
-                total += element
-                if result_type is None:
-                    result_type = "Number"
+                raise ValueError(f"Invalid numeric expression: {element}")
 
         # Return result with appropriate type
         if result_type == "Integer":
-            return Expression("Integer", total)
+            return Literal(Integer, total)
         elif result_type == "Float":
-            return Expression("Float", total)
+            return Literal(Float, total)
         else:
-            return Expression("Number", total)
-
+            return Literal(Number, total)
 
 
 class Subtract(Expression):
@@ -86,10 +75,10 @@ class Subtract(Expression):
     Supports Integer, Number, and Float symbols.
     Returns an Expression with the appropriate numeric type.
     """
-    def __init__(self, tail: tuple[BaseElement]):
-        super().__init__(head=Subtract, tail=tail, attributes=(Function,))
+    def __init__(self, *tail: tuple[BaseElement]):
+        super().__init__(head="Subtract", *tail)
     
-    def evaluate(self, _) -> Expression:
+    def evaluate(self, context: Optional[Context]) -> Literal:
         if not self._tail:
             raise ValueError("Subtract operation requires at least one argument.")
 
@@ -107,11 +96,11 @@ class Subtract(Expression):
                 raise TypeError("Subtract operation only supports Integer, Number, and Float symbols.")
 
         if all(element.head == "Integer" for element in self._tail):
-            return IntegerSymbol(result)
+            return Literal(element.head, result)
         elif all(element.head == "Number" for element in self._tail):
-            return NumberSymbol(result)
+            return Literal(Number, result)
         else:
-            return FloatSymbol(result)
+            return Literal(Float, result)
 
 
 class Times(Expression):
@@ -122,7 +111,7 @@ class Times(Expression):
     Returns an Expression with the appropriate numeric type.
     """
     def __init__(self, tail: tuple[BaseElement]):
-        super().__init__(head=Times, tail=tail, attributes=(Function,))
+        super().__init__(head=Times, tail=tail)
     
     def evaluate(self, _) -> Expression:
         product = 1
@@ -149,7 +138,7 @@ class LessThan(Expression):
     Returns a Boolean expression.
     """
     def __init__(self, tail: tuple[BaseElement]):
-        super().__init__(head=LessThan, tail=tail, attributes=(Function,))
+        super().__init__(head=LessThan, tail=tail)
 
     def evaluate(self, _) -> Expression:
         a_val = self._tail[0]
@@ -163,7 +152,7 @@ class LessThan(Expression):
         if head_a not in _valid_types or head_b not in _valid_types:
             raise TypeError("LessThan operation only supports Integer, Number, and Float symbols.")
         result = a_val.tail < b_val.tail
-        return Expression("Boolean", result, attributes=(Atom,))
+        return Expression("Boolean", result)
 
 
 class GreaterThan(Expression):
@@ -174,7 +163,7 @@ class GreaterThan(Expression):
     Returns a Boolean expression.
     """
     def __init__(self, *tail: BaseElement):
-        super().__init__(head=GreaterThan, *tail, attributes=(Function,))
+        super().__init__(head=GreaterThan, *tail)
 
     def evaluate(self, _) -> Expression:
         a_val = self._tail[0]
@@ -185,4 +174,4 @@ class GreaterThan(Expression):
         if a_val.head not in _valid_types or b_val.head not in _valid_types:
             raise TypeError("GreaterThan operation only supports Integer, Number, and Float symbols.")
         result = a_val.tail > b_val.tail
-        return Expression("Boolean", result, attributes=(Atom,))
+        return Expression("Boolean", result)

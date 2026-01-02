@@ -1,4 +1,4 @@
-from core.expression import Expression, BaseElement
+from core.base_element import Expression, BaseElement
 from core.evaluation import Context
 
 

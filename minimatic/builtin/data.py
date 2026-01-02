@@ -14,8 +14,8 @@
 - reduce(function, collection, initial)
 """
 
-from core.expression import Expression
-from core.attributes import Atom, Function
+from core.base_element import Expression
+from builtin.heads import Atom, Function
 
 
 # Tabular structure

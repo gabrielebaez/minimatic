@@ -1,8 +1,4 @@
 
-# Symbol types
-Atom = "Atom"
-Function = "Function"
-
 # Attribute names
 Protected = "Protected"
 ReadProtected = "ReadProtected"
@@ -18,5 +14,4 @@ NumericFunction = "NumericFunction"
 SequenceHold = "SequenceHold"
 HoldFirst = "HoldFirst"
 HoldRest = "HoldRest"
-HoldAll = "HoldAll"
 HoldAllComplete = "HoldAllComplete"
