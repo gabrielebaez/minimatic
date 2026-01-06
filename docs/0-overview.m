@@ -1,37 +1,3 @@
-# minimatic
-
-An experiment on language design and system integration.
-
-Minimatic is a symbolic-functional tiny programming language inspired by the wolfram language, 
-python and picolisp.
-
-VM + DB + Server + Prelude.
-
-ALERT: Currently in very alpha version, things will move around a lot.
-
-
-## Core ideas:
-
-1. Everything is an expression  
-   - Every piece of data, every program, every structure—even the language’s own code—is represented as a symbolic expression (```head(arg₁, arg₂, …)```).  
-   - This uniform representation enables powerful homoiconicity: code can be data and data can be code.
-
-2. Everything is symbolic  
-   - Symbols stand for themselves until evaluation rules transform them.  
-   - Symbolic representation allows arbitrary, domain-specific constructs without new syntax.
-
-3. Everything is immutable (values are never overwritten in place)  
-   - Once created, an expression’s value is fixed.  
-   - This makes programs easier to reason about, parallelize, and test.
-
-4. Everything is extensible  
-   - Minimatic is easily extensible through the definition of Symbols.
-   - A symbol is a simple class definition in python.
-
-
-## A bit of (future) syntax
-
-```
 (* This is a comment *)
 
 (* Typing an expression returns the result *)
@@ -120,4 +86,3 @@ myHash["Puce"]  := 3.5                (* 3.5, extend it *)
 KeyDropFrom(myHash, "Green")          (* Wipes out key Green *)
 Keys(myHash)                          (* {Red, Puce} *)
 Values(myHash)                        (* {1, 3.5} *)
-```

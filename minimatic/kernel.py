@@ -1,4 +1,3 @@
-from math import exp
 from core.base_element import Symbol, Literal, Expression
 from core.evaluation import Context
 from builtin.heads import Integer, Float, Number, Bool
