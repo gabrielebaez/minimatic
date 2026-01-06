@@ -11,7 +11,7 @@ Sin(Pi/2)        (* 1 *)
 (* Alternate Syntaxes for Function Call with one parameter *)
 (Pi/2) // Sin    (* 1 *)
 
-(* Every syntax in WL has some equivalent as a function call *)
+(* Every syntax in minimatic has some equivalent as a function call *)
 Times(2, 2)      (* 4 *)
 Plus(5, 8)       (* 13 *)
 
