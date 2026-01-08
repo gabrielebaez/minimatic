@@ -31,13 +31,13 @@ ALERT: Currently in very alpha version, things will move around a lot.
 
 ## Checklist to 0.0.1
 
--[X] Foundational classes (Expression, Literal, Symbol).
--[X] Expression evaluation.
--[X] Custom expression evaluation for functions.
--[ ] Core 25 builtin symbols.
--[ ] Initial kernel interpreter implementation.
--[ ] Stabilizing syntax / semantics.
--[ ] Initial Parser.
+- [x] Foundational classes (Expression, Literal, Symbol).
+- [x] Expression evaluation.
+- [x] Custom expression evaluation for functions.
+- [ ] Core 25 builtin symbols.
+- [ ] Initial kernel interpreter implementation.
+- [ ] Stabilizing syntax / semantics.
+- [ ] Initial Parser.
 
 ## A bit of (future) syntax
 
