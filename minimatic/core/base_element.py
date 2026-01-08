@@ -1,8 +1,6 @@
 from abc import ABC
 from copy import deepcopy
-from typing import (
-    Any, Optional, Sequence, Tuple, Iterator, Callable
-)
+from typing import Any, Optional, Sequence, Tuple, Iterator, Callable
 
 
 class Context:
@@ -21,6 +19,10 @@ class BaseElement(ABC):
     
     @property
     def tail(self) -> Tuple[()]|Sequence[BaseElement]:
+        raise NotImplementedError("Subclasses should implement this method.")
+
+    @property
+    def value(self) -> BaseElement:
         raise NotImplementedError("Subclasses should implement this method.")
 
     def evaluate(self, context: Optional[Context]) -> BaseElement:

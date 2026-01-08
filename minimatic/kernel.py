@@ -1,7 +1,7 @@
 from core.base_element import Symbol, Literal, Expression
 from core.evaluation import Context
 from builtin.heads import Integer, Float, Number, Bool
-from builtin.arithmetic import Plus
+from builtin.arithmetic import Plus, Subtracts, Divide
 from builtin.core import If
 from copy import copy, deepcopy
 from typing import Dict, Any
@@ -13,14 +13,20 @@ a = Literal(Integer, -23)
 b = Literal(Float, 24.34)
 c = Literal(Number, 12)
 
-expr = Plus(a,b,c)
+s = Symbol('S')
 
-expr_if = If(Plus(a,b), Literal(Bool, True), Literal(Bool, False))
-print(expr_if, expr_if.evaluate(context=context))
-print(expr)
-print(expr.evaluate(context))
+p = Plus(a,b,c)
+m = Subtracts(Plus(c,a),b,c, s)
+d = Divide(a,b,c)
 
+expr_if = If(Plus(c,a), Literal(Bool, True), Literal(Bool, False))
 
+print(f"{expr_if}  -->  {expr_if.evaluate(context=context)}")
+print(f"{p}        -->. {p.evaluate(context=context)}")
+print(m, m.evaluate(context), sep='\t')
+print(d, d.evaluate(context), sep='\t')
+
+'''
 # ============================================================================
 # BASIC CONSTRUCTION
 # ============================================================================
@@ -189,13 +195,15 @@ print(result)
 
 # Invalid head type
 try:
-    Expression(123, Literal(Integer, 1))  # TypeError: head must be BaseElement or str
+    a = Expression(123, Literal(Integer, 1))  # TypeError: head must be BaseElement or str
+    print(a)
 except Exception as e:
     print(f"Error: {e}")
 
 # Invalid tail element type
 try:
-    Expression("Plus", Literal(Integer, 1), "invalid")  # TypeError in runtime usage
+    b = Expression("Plus", Literal(Integer, 1), "invalid")  # TypeError in runtime usage
+    print(b)
 except Exception as e:
     print(f"Error: {e}")
 
@@ -210,3 +218,4 @@ print(repr(expr))  # Function(x, 42)
 
 # __str__: User-friendly representation (same as __repr__ here)
 print(str(expr))  # Function(x, 42)
+'''

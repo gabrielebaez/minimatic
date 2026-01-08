@@ -29,6 +29,16 @@ ALERT: Currently in very alpha version, things will move around a lot.
    - A symbol is a simple class definition in python.
 
 
+## Checklist to 0.0.1
+
+-[X] Foundational classes (Expression, Literal, Symbol).
+-[X] Expression evaluation.
+-[X] Custom expression evaluation for functions.
+-[ ] Core 25 builtin symbols.
+-[ ] Initial kernel interpreter implementation.
+-[ ] Stabilizing syntax / semantics.
+-[ ] Initial Parser.
+
 ## A bit of (future) syntax
 
 ```
@@ -74,31 +84,23 @@ Double(Sin(Pi/2))       (* 2 *)
 MyFirst() := (Print("Hello"); Print("World"))  (* Note outer parens are critical here *)
 MyFirst()                                      (* Hello World *)
 
-(* C-Style For Loop *)
-PrintTo(x_) := For(y=0, y<x, y++, (Print(y)))  (* Start, test, incr, body *)
+(* Python-Style For Loop *)
+PrintTo(x_) := For(y, Range(10), Print(y))     (* Var, Iterator, body *)
 PrintTo(5)                                     (* 0 1 2 3 4 *)
 
 (* While Loop *)
-x = 0; While(x < 2, (Print(x); x++))         (* While loop with test and body *)
+x = 0; While(x < 2, (Print(x); x++))        (* While loop with test and body *)
 
 (* If and conditionals *)
-x = 8; If(x==8, Print("Yes"), Print("No"))   (* Condition, true case, else case *)
+x = 8; If(x==8, Print("Yes"), Print("No"))  (* Condition, true case, else case *)
 
 Switch(x, (* Value match style switch *)
        2, Print("Two"), 
        8, Print("Yes"))
 
-Which(    (* Elif style switch *)
+Which(  (* Elif style switch *)
   x==2, Print("No"), 
   x==8, Print("Yes"))
-
-(* Variables other than parameters are global by default, even inside functions *)
-y = 10             (* 10, global variable y *)
-PrintTo(5)         (* 0 1 2 3 4 *)
-y                  (* 5, global y clobbered by loop counter inside PrintTo *)
-x = 20             (* 20, global variable x *)
-PrintTo(5)         (* 0 1 2 3 4 *)
-x                  (* 20, x in PrintTo is a parameter and automatically local *)
 
 (* Lists *)
 myList = {1, 2, 3, 4}     (* {1, 2, 3, 4} *)

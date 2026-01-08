@@ -10,5 +10,6 @@ Number = Symbol("Number")
 Integer = Symbol("Integer")
 Float = Symbol("Float")
 
+# other literals
 Bool = Symbol("Bool")
 String = Symbol('String')
