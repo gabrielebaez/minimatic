@@ -1,125 +1,93 @@
-# minimatic
+# Minimatic EDSL
 
-An experiment on language design and system integration.
+> ⚠️ **Project Status: Proof of Concept**
+>
+> Minimatic is currently in early active development. The **Expression Engine** is implemented and functional, but high-level interfaces (Kernel) and syntax parsing are not yet available. The API is subject to change.
 
-Minimatic is a symbolic-functional tiny programming language inspired by the wolfram language, 
-python and picolisp.
+Minimatic is a lightweight **Embedded Domain Specific Language (EDSL)** and symbolic computation engine written in Python. It provides a robust framework for building immutable expression trees, evaluating them within custom contexts, and extending the language with builtins and special forms.
 
-VM + DB + Server + Prelude.
+## Architecture Overview
 
-ALERT: Currently in very alpha version, things will move around a lot.
+Minimatic is architected around a strictly typed, immutable Abstract Syntax Tree (AST) and a hybrid evaluation model. The design separates the definition of symbolic structures from the rules governing their evaluation, allowing for maximum flexibility.
 
+### 1. The Abstract Syntax Tree (AST)
 
-## Core ideas:
+The core data model consists of three primary classes inheriting from `BaseElement`. This hierarchy ensures type safety and structural consistency throughout the system.
 
-1. Everything is an expression  
-   - Every piece of data, every program, every structure—even the language’s own code—is represented as a symbolic expression (```head(arg₁, arg₂, …)```).  
-   - This uniform representation enables powerful homoiconicity: code can be data and data can be code.
+*   **`BaseElement`**: The abstract root interface defining behaviors like `evaluate()`, `__hash__`, and structural properties (`head`, `tail`).
+*   **`Symbol`**: Represents an atomic variable name or identifier (e.g., `x`, `user_name`). It acts as a pointer to a value within a Context.
+*   **`Literal`**: Represents a concrete Python value wrapped in the symbolic system (e.g., integers, strings). Literals evaluate to themselves.
+*   **`Expression`**: The fundamental n-ary tree node. Every Expression consists of a **Head** (operator/function) and a **Tail** (arguments/operands).
+    *   **Immutability**: Once constructed, an Expression cannot be changed. This allows for safe caching, thread safety, and reliable structural hashing.
+    *   **Structure**: An expression like `Add(x, 5)` is an instance where `head='Add'` and `tail=(Symbol('x'), Literal(5))`.
 
-2. Everything is symbolic  
-   - Symbols stand for themselves until evaluation rules transform them.  
-   - Symbolic representation allows arbitrary, domain-specific constructs without new syntax.
+### 2. The Context (Evaluation Environment)
 
-3. Everything is immutable (values are never overwritten in place)  
-   - Once created, an expression’s value is fixed.  
-   - This makes programs easier to reason about, parallelize, and test.
+Evaluation does not happen in a vacuum; it requires a `Context`. The Context serves as the lexical environment for the evaluation engine.
 
-4. Everything is extensible  
-   - Minimatic is easily extensible through the definition of Symbols.
-   - A symbol is a simple class definition in python.
+*   **Variable Storage**: Maps `Symbol` names to their current values.
+*   **Builtin Registry**: Stores the Python functions and classes that implement the language's operations (e.g., how 'Add' actually performs addition).
+*   **Scope Management**: The architecture is designed to support scoped copying (deep copying of variable states) via `context.copy()`, enabling recursive evaluation with isolated state.
 
+### 3. The Hybrid Extension Model
 
-## Checklist to 0.0.1
+Minimatic distinguishes between two fundamentally different types of operations: **Pure Functions** and **Special Forms**. This distinction is critical for handling the difference between mathematical eager evaluation and logical lazy evaluation.
 
-- [x] Foundational classes (Expression, Literal, Symbol).
-- [x] Expression evaluation.
-- [x] Custom expression evaluation for functions.
-- [ ] Core 25 builtin symbols.
-- [ ] Initial kernel interpreter implementation.
-- [ ] Stabilizing syntax / semantics.
-- [ ] Initial Parser.
+#### A. Pure Builtins (Context Registration)
+Standard operations (math, string manipulation) are implemented as external Python functions registered in the Context.
 
-## A bit of (future) syntax
+*   **Mechanism**: You define `def my_func(a, b): ...` and call `context.set('MyOp', my_func)`.
+*   **Evaluation Strategy**: **Eager**. The engine evaluates all arguments in the `tail` *before* passing them to `my_func`.
+*   **Constraints**: These functions cannot access the Context directly (stateless) and cannot prevent arguments from being evaluated.
 
-```
-(* This is a comment *)
+#### B. Special Forms (Expression Subclassing)
+Language features that require control flow, state mutation, or lazy evaluation are implemented by subclassing the `Expression` class itself.
 
-(* Typing an expression returns the result *)
-2*2              (* 4  *)
-5+8              (* 13 *)
+*   **Mechanism**: You create `class MyControlFlow(Expression)` and override its `evaluate()` method.
+*   **Evaluation Strategy**: **Lazy**. The implementation explicitly decides *when* (or if) to evaluate parts of the `tail`.
+*   **Capabilities**: These forms have direct access to the `Context` object, allowing them to define variables (`Set`) or branch logic without evaluating unused paths (`If`).
 
-(* Function Call *)
-(* Note, function names (and everything else) are case sensitive *)
-Sin(Pi/2)        (* 1 *)
+## Project Status & Roadmap
 
-(* Alternate Syntaxes for Function Call with one parameter *)
-(Pi/2) // Sin    (* 1 *)
+Minimatic is currently in the Proof of Concept (PoC) phase.
 
-(* Every syntax in minimatic has some equivalent as a function call *)
-Times(2, 2)      (* 4 *)
-Plus(5, 8)       (* 13 *)
+### ✅ Currently Available: Expression Engine
+The core API to build and manipulate symbolic trees is fully functional.
+*   Construction of immutable ASTs.
+*   Recursive evaluation engine with Context support.
+*   Extension interfaces for builtins and special forms.
 
-(* Using a variable for the first time defines it *)
-x = 5            (* 5 *)
-x == 5           (* True, C-style assignment and equality testing *)
-x                (* 5 *)
-x = x + 5        (* 10 *)
-x                (* 10 *)
-Set(x, 20)       (* Everything has a function equivalent *)
-x                (* 20 *)
+### 🚧 In Progress: The Kernel
+The Kernel is intended to be the high-level "User Interface" for the language.
+*   **Goal**: Simplify interaction with the engine. Instead of manually constructing `Expression` nodes, users will interact with a session manager and a simplified API.
+*   **Status**: Design phase.
 
-(* using undefined variables is fine, they just obstruct evaluation *)
-cow + 5          (* 5 + cow, cow is undefined so can't evaluate further *)
-cow + 5 + 10     (* 15 + cow, it'll evaluate what it can *)
-moo = cow + 5    (* Beware, moo now holds an expression, not a number! *)
+### 🔜 Planned: The Parser
+The component that translates text syntax into Minimatic ASTs.
+*   **Goal**: Parse strings like `{ x + 5 * y }` into `Expression` objects.
+*   **Status**: Scheduled for development after the Kernel stabilizes.
 
-(* Defining a function *)
-Double(x_) := x * 2     (* Note: _ after x to indicate no pattern matching constraints *)
-Double(10)              (* 20 *)
-Double(Sin(Pi/2))       (* 2 *)
-(Pi/2) // Sin // Double (* 2, //-syntax lists functions in execution order *)
+## Quick Start (Engine Level)
 
-(* For imperative-style programming use ; to separate statements *)
-(* Discards any output from LHS and runs RHS *)
-MyFirst() := (Print("Hello"); Print("World"))  (* Note outer parens are critical here *)
-MyFirst()                                      (* Hello World *)
+Since the Parser and Kernel are not yet available, you interact with Minimatic directly by constructing the AST in Python.
 
-(* Python-Style For Loop *)
-PrintTo(x_) := For(y, Range(10), Print(y))     (* Var, Iterator, body *)
-PrintTo(5)                                     (* 0 1 2 3 4 *)
+```python
+from minimatic import Context, Expression, Literal, Symbol
 
-(* While Loop *)
-x = 0; While(x < 2, (Print(x); x++))        (* While loop with test and body *)
+# 1. Initialize a context
+ctx = Context()
 
-(* If and conditionals *)
-x = 8; If(x==8, Print("Yes"), Print("No"))  (* Condition, true case, else case *)
+# 2. Define a Builtin (Method A: Pure Function)
+def my_add(a, b):
+    # Implementation detail: unwrap values
+    return Literal(a.value + b.value)
 
-Switch(x, (* Value match style switch *)
-       2, Print("Two"), 
-       8, Print("Yes"))
+ctx.set('Add', my_add)
 
-Which(  (* Elif style switch *)
-  x==2, Print("No"), 
-  x==8, Print("Yes"))
+# 3. Build AST manually
+expression = Expression('Add', Literal(5), Literal(10))
 
-(* Lists *)
-myList = {1, 2, 3, 4}     (* {1, 2, 3, 4} *)
-myList[1]                 (* 1 - note list indexes start at 1, not 0 *)
-Map(Double, myList)       (* {2, 4, 6, 8} - functional style list map function *)
-Double /@ myList          (* {2, 4, 6, 8} - Abbreviated syntax for above *)
-Fold(Plus, 0, myList)     (* 10 (0+1+2+3+4) *)
-FoldList(Plus, 0, myList) (* {0, 1, 3, 6, 10} - fold storing intermediate results *)
-Append(myList, 5)         (* {1, 2, 3, 4, 5} - note myList is not updated *)
-Prepend(myList, 5)        (* {5, 1, 2, 3, 4} - add "myList = " if you want it to be *)
-Join(myList, {3, 4})      (* {1, 2, 3, 4, 3, 4} *)
-myList[2] = 5             (* {1, 5, 3, 4} - this does update myList *)
-
-(* Associations, aka Dictionaries/Hashes *)
-myHash = {"Green" -> 2, "Red" -> 1}   (* Create an association *)
-myHash["Green"]                       (* 2, use it *)
-myHash["Green"] := 5                  (* 5, update it *)
-myHash["Puce"]  := 3.5                (* 3.5, extend it *)
-KeyDropFrom(myHash, "Green")          (* Wipes out key Green *)
-Keys(myHash)                          (* {Red, Puce} *)
-Values(myHash)                        (* {1, 3.5} *)
+# 4. Evaluate
+result = expression.evaluate(ctx)
+# Result is a Literal wrapping 15
 ```
