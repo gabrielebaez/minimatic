@@ -6,9 +6,17 @@
 from core.base_element import (Context, Symbol, 
                                Literal, Expression, 
                                BaseElement, EvaluationError)
-from builtin.arithmetic import Plus
+from kernel import Kernel
 
 def main():
+    print("=" * 70)
+    print("Kernel Example")
+    print("=" * 70)
+
+    k = Kernel()
+    e = Literal('A')
+    print(k.evaluate(e), k.ctx)
+
     print("=" * 70)
     print("Symbolic Computation Framework Demo")
     print("=" * 70)

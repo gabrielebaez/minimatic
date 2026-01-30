@@ -49,45 +49,156 @@ Language features that require control flow, state mutation, or lazy evaluation 
 
 ## Project Status & Roadmap
 
-Minimatic is currently in the Proof of Concept (PoC) phase.
-
-### ✅ Currently Available: Expression Engine
-The core API to build and manipulate symbolic trees is fully functional.
-*   Construction of immutable ASTs.
-*   Recursive evaluation engine with Context support.
-*   Extension interfaces for builtins and special forms.
-
-### 🚧 In Progress: The Kernel
-The Kernel is intended to be the high-level "User Interface" for the language.
-*   **Goal**: Simplify interaction with the engine. Instead of manually constructing `Expression` nodes, users will interact with a session manager and a simplified API.
-*   **Status**: Design phase.
-
-### 🔜 Planned: The Parser
-The component that translates text syntax into Minimatic ASTs.
-*   **Goal**: Parse strings like `{ x + 5 * y }` into `Expression` objects.
-*   **Status**: Scheduled for development after the Kernel stabilizes.
+See [docs/roadmap.md](docs/roadmap.md)
 
 ## Quick Start (Engine Level)
 
 Since the Parser and Kernel are not yet available, you interact with Minimatic directly by constructing the AST in Python.
 
 ```python
-from minimatic import Context, Expression, Literal, Symbol
+from core.base_element import (Context, Symbol, 
+                               Literal, Expression, 
+                               BaseElement, EvaluationError)
 
-# 1. Initialize a context
+
+# --- 1. Basic Construction ---
+
+# Creating Literals
+num = Literal(42)
+text = Literal("Hello")
+print(f"Literal: {num}")
+print(f"Literal type: {num.head}")
+
+# Creating Symbols
+x = Symbol('x')
+y = Symbol('y')
+func_name = Symbol('Add')
+print(f"Symbol: {x}")
+print(f"Symbol hash: {hash(x)}")
+
+# Creating Expressions (Tree structure)
+# Represents: Add(x, 10)
+expr1 = Expression('Add', x, Literal(10))
+print(f"Expression: {expr1}")
+print(f"Expression head: {expr1.head}")
+print(f"Expression tail: {expr1.tail}")
+
+# --- 2. Evaluation Strategy ---
+
 ctx = Context()
 
-# 2. Define a Builtin (Method A: Pure Function)
-def my_add(a, b):
-    # Implementation detail: unwrap values
+# Define a custom Add function that works with our Literals
+def add_func(a: BaseElement, b: BaseElement) -> BaseElement:
+    # In a real system, we'd check types. Here we assume numeric Literals.
+    val_a = a.value if isinstance(a, Literal) else str(a)
+    val_b = b.value if isinstance(b, Literal) else str(a)
+    return Literal(val_a + val_b)
+
+def square_func(a: BaseElement) -> BaseElement:
+    val = a.value if isinstance(a, Literal) else int(str(a))
+    return Literal(val ** 2)
+
+# Register functions in context
+ctx.set('Add', add_func)
+ctx.set('Square', square_func)
+
+# Register variables
+ctx.set('x', Literal(5))
+ctx.set('y', Literal(3))
+
+# Evaluate: Add(x, 10) where x=5 -> 15
+try:
+    result = expr1.evaluate(ctx)
+    print(f"Evaluation of '{expr1}' with x=5: {result}")
+except Exception as e:
+    print(f"Error: {e}")
+
+# Evaluate: Square(x) where x=5 -> 25
+expr_square = Expression('Square', x)
+print(f"Evaluation of '{expr_square}' with x=5: {expr_square.evaluate(ctx)}")
+
+# --- 3. Nesting and Recursion ---
+
+# Represents: Add(Square(x), y)
+# Structure: Add( Square(x), y )
+nested_expr = Expression('Add', Expression('Square', x), y)
+
+print(f"Nested Expression: {nested_expr}")
+
+# Evaluate: Square(5) + 3 -> 25 + 3 -> 28
+result_nested = nested_expr.evaluate(ctx)
+print(f"Evaluation result: {result_nested}")
+
+# --- 4. Immutability and Hashability ---
+
+# Expressions are immutable and hashable, making them safe for Sets/Dicts
+expr_a = Expression('Add', x, y)
+expr_b = Expression('Add', x, y)
+expr_c = Expression('Add', y, x) # Different structure
+
+print(f"expr_a == expr_b: {expr_a == expr_b}") # True
+print(f"expr_a == expr_c: {expr_a == expr_c}") # False
+print(f"hash(expr_a) == hash(expr_b): {hash(expr_a) == hash(expr_b)}")
+
+# Using as dictionary keys
+expression_map = {
+    expr_a: "Sum of x and y",
+    Expression('Square', x): "x squared"
+}
+print(f"Lookup '{expr_a}' in map: {expression_map.get(expr_a)}")
+
+# --- 5. Structural Operations ---
+
+# Create a list of elements
+list_expr = Expression.list_of(x, y, Literal(10))
+print(f"Original List: {list_expr}")
+
+# Map: Add 1 to every literal in the tail
+def incrementor(elem):
+    if isinstance(elem, Literal) and isinstance(elem.value, (int, float)):
+        return Literal(elem.value + 1)
+    return elem
+
+new_list = list_expr.map(incrementor)
+print(f"Mapped List (incremented literals): {new_list}")
+
+# Replace: Change the head of the expression
+replaced_head = list_expr.replace(head="Vector")
+print(f"Replaced Head (List -> Vector): {replaced_head}")
+
+# --- 6. Error Handling ---
+
+# Case A: Undefined Symbol
+z_expr = Expression('Add', Symbol('undefined_var'), Literal(1))
+try:
+    z_expr.evaluate(ctx)
+except KeyError as e:
+    print(f"Caught KeyError: {e}")
+except EvaluationError as e:
+    print(f"Caught EvaluationError: {e}")
+
+# Case B: Function Application Failure
+# Creating a function that requires 2 args but passing 1
+def strict_add(a, b):
     return Literal(a.value + b.value)
 
-ctx.set('Add', my_add)
+ctx.set('StrictAdd', strict_add)
+bad_expr = Expression('StrictAdd', x) # Missing 'y'
 
-# 3. Build AST manually
-expression = Expression('Add', Literal(5), Literal(10))
+try:
+    bad_expr.evaluate(ctx)
+except EvaluationError as e:
+    print(f"Caught EvaluationError: {e}")
 
-# 4. Evaluate
-result = expression.evaluate(ctx)
-# Result is a Literal wrapping 15
+# --- 7. Factory Methods and Callable Interface ---
+
+# Using callable syntax
+my_expr = Expression('Add', x, y)
+result_callable = my_expr(ctx)
+print(f"Using expr(context) syntax: {result_callable}")
+
+# Using From Function factory
+factory_expr = Expression.from_function('Multiply', Literal(2), Literal(3))
+ctx.set('Multiply', lambda a, b: Literal(a.value * b.value))
+print(f"Factory result: {factory_expr.evaluate(ctx)}")
 ```

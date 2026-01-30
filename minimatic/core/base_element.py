@@ -517,7 +517,7 @@ class Expression(BaseElement):
                 if isinstance(result, BaseElement):
                     return result
                 else:
-                    # TODO: Auto-wrap non-BaseElement results
+                    # Auto-wrap non-BaseElement results
                     return result
             except Exception as e:
                 raise EvaluationError(
