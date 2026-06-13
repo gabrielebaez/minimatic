@@ -23,14 +23,14 @@ Examples:
     x_: 0               Optional[Pattern[x, Blank[]], 0]
 """
 
-from __future__ import annotations
+# from __future__ import annotations
 from typing import Optional, Union, Any, Callable, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from core.atoms import Element
 
-from minimatic.core.symbol import Symbol
-from minimatic.core.expression import Expression, is_expr
+from src.core.symbol import Symbol
+from src.core.expression import Expression, is_expr
 
 from .blanks import (
     Blank,
@@ -40,10 +40,7 @@ from .blanks import (
     is_any_blank,
 )
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
 # PATTERN HEAD SYMBOLS
-# ═══════════════════════════════════════════════════════════════════════════════
 
 Pattern = Symbol("Pattern")
 """Head for named patterns: Pattern[name, blank]."""
@@ -75,10 +72,7 @@ Verbatim = Symbol("Verbatim")
 HoldPattern = Symbol("HoldPattern")
 """Head to hold pattern during evaluation: HoldPattern[pattern]."""
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
 # PATTERN CONSTRUCTORS
-# ═══════════════════════════════════════════════════════════════════════════════
 
 def pattern(name: Symbol, pat: Optional[Expression] = None) -> Expression:
     """
@@ -353,10 +347,7 @@ def hold_pattern(pat: Expression) -> Expression:
     """
     return Expression(HoldPattern, pat)
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
 # TYPE PREDICATES
-# ═══════════════════════════════════════════════════════════════════════════════
 
 def is_pattern(obj: object) -> bool:
     """Check if object is a Pattern expression."""
@@ -425,9 +416,7 @@ def is_pattern_construct(obj: object) -> bool:
     )
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
 # PATTERN UTILITIES
-# ═══════════════════════════════════════════════════════════════════════════════
 
 def pattern_name(pat: Expression) -> Optional[Symbol]:
     """
@@ -446,8 +435,8 @@ def pattern_name(pat: Expression) -> Optional[Symbol]:
         >>> pattern_name(blank())
         None
     """
-    if is_pattern(pat) and len(pat) >= 1:
-        return pat[0]
+    if is_pattern(pat) and len(pat.args) >= 1:
+        return pat.args[0]
     return None
 
 
@@ -466,8 +455,8 @@ def pattern_blank(pat: Expression) -> Optional[Expression]:
         >>> pattern_blank(pattern(x, blank(Symbol("Integer"))))
         Blank[Integer]
     """
-    if is_pattern(pat) and len(pat) >= 2:
-        return pat[1]
+    if is_pattern(pat) and len(pat.args) >= 2:
+        return pat.args[1]
     return None
 
 
@@ -481,8 +470,8 @@ def get_default_value(opt: Expression) -> Optional["Element"]:
     Returns:
         The default value, or None if not specified or not Optional.
     """
-    if is_optional(opt) and len(opt) >= 2:
-        return opt[1]
+    if is_optional(opt) and len(opt.args) >= 2:
+        return opt.args[1]
     return None
 
 
@@ -496,8 +485,8 @@ def get_condition_test(cond: Expression) -> Optional[Expression]:
     Returns:
         The test expression, or None if not a Condition.
     """
-    if is_condition(cond) and len(cond) >= 2:
-        return cond[1]
+    if is_condition(cond) and len(cond.args) >= 2:
+        return cond.args[1]
     return None
 
 
@@ -511,8 +500,8 @@ def get_condition_pattern(cond: Expression) -> Optional[Expression]:
     Returns:
         The pattern portion, or None if not a Condition.
     """
-    if is_condition(cond) and len(cond) >= 1:
-        return cond[0]
+    if is_condition(cond) and len(cond.args) >= 1:
+        return cond.args[0]
     return None
 
 
@@ -526,8 +515,8 @@ def unwrap_hold_pattern(pat: Expression) -> Expression:
     Returns:
         The inner pattern if HoldPattern, otherwise the input.
     """
-    if is_hold_pattern(pat) and len(pat) >= 1:
-        return pat[0]
+    if is_hold_pattern(pat) and len(pat.args) >= 1:
+        return pat.args[0]
     return pat
 
 

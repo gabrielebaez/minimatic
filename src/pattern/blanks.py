@@ -23,14 +23,14 @@ Examples:
     ___Symbol   →  BlankNullSequence[Symbol]
 """
 
-from __future__ import annotations
+# from __future__ import annotations
 from typing import Optional, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from minimatic.core.atoms import Element
+    from src.core.atoms import Element
 
-from minimatic.core.symbol import Symbol
-from minimatic.core.expression import Expression, is_expr, head_of
+from src.core.symbol import Symbol
+from src.core.expression import Expression, is_expr, head_of
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -256,9 +256,9 @@ def blank_head_constraint(blank_expr: Expression) -> Optional[Symbol]:
     if not is_any_blank(blank_expr):
         raise TypeError(f"Expected blank pattern, got {type(blank_expr).__name__}")
 
-    if len(blank_expr) == 0:
+    if len(blank_expr.args) == 0:
         return None
-    return blank_expr[0]
+    return blank_expr.args[0]
 
 
 def blank_matches_head(blank_expr: Expression, elem: "Element") -> bool:

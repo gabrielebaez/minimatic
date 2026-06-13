@@ -5,14 +5,12 @@ Implements Plus, Times, Power, and related operations following
 Wolfram Language semantics with proper attribute handling.
 """
 
-from __future__ import annotations
-
 import math
 from typing import Any, List
 
-from minimatic.core import Symbol, Expression, is_expr
-from minimatic.core.attributes import Flat, Orderless, Listable, NumericFunction, HoldRest
-from minimatic.eval.context import EvaluationContext
+from src.core import Symbol, Expression, is_expr
+from src.core.attributes import Flat, Orderless, Listable, NumericFunction, HoldRest
+from src.eval.context import EvaluationContext
 
 from .registry import register_builtin
 
@@ -542,7 +540,7 @@ def sum_builtin(expr: Expression, context: EvaluationContext) -> Any:
     """
     Summation: Sum[expr, {i, imin, imax}] or Sum[expr, {i, imax}].
     """
-    from minimatic.eval import evaluate
+    from src.eval import evaluate
 
     args = list(expr.args)
     if len(args) < 1:
@@ -571,8 +569,8 @@ def sum_builtin(expr: Expression, context: EvaluationContext) -> Any:
             if is_integer(imax) and imax > 0:
                 for i in range(1, imax + 1):
                     # Substitute and evaluate
-                    from minimatic.pattern import replace_with_bindings
-                    from minimatic.pattern import MatchResult, Bindings
+                    from src.pattern import replace_with_bindings
+                    from src.pattern import MatchResult, Bindings
                     substituted = replace_with_bindings(summand, {var: i})
                     result += evaluate(substituted, context)
                 return result
@@ -592,7 +590,7 @@ Product = Symbol("Product")
 )
 def product_builtin(expr: Expression, context: EvaluationContext) -> Any:
     """Product: Product[expr, {i, imin, imax}]."""
-    from minimatic.eval import evaluate
+    from src.eval import evaluate
 
     args = list(expr.args)
     if len(args) < 1:
@@ -618,7 +616,7 @@ def product_builtin(expr: Expression, context: EvaluationContext) -> Any:
             imax = evaluate(iter_args[1], context)
             if is_integer(imax) and imax > 0:
                 for i in range(1, imax + 1):
-                    from minimatic.pattern import replace_with_bindings
+                    from src.pattern import replace_with_bindings
                     substituted = replace_with_bindings(factor, {var: i})
                     result *= evaluate(substituted, context)
                 return result

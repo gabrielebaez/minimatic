@@ -5,12 +5,10 @@ Implements Sequence flattening, Flat attribute application,
 Orderless sorting, and Listable threading.
 """
 
-from __future__ import annotations
-
 from typing import Any, Iterable, List, Tuple
 
-from minimatic.core import Expression, Symbol, is_expr, head_of
-from minimatic.core.attributes import has_attribute, Flat, Orderless, Listable, SequenceHold
+from src.core import Expression, Symbol, is_expr, head_of
+from src.core.attributes import has_attribute, Flat, Orderless, Listable, SequenceHold
 
 
 def flatten_sequences(expr: Expression, hold_sequence: bool = False) -> Expression:
@@ -45,7 +43,7 @@ def flatten_sequences(expr: Expression, hold_sequence: bool = False) -> Expressi
             new_args.append(arg)
 
     if changed:
-        return Expression(expr.head, *new_args, attributes=expr.attributes)
+        return Expression(expr.head, *new_args, _attrs=expr.attributes)
     return expr
 
 
@@ -89,7 +87,7 @@ def apply_flat(expr: Expression, is_flat: bool = True) -> Expression:
         else:
             new_args.append(arg)
 
-    return Expression(head, *new_args, attributes=expr.attributes)
+    return Expression(head, *new_args, _attrs=expr.attributes)
 
 
 def apply_orderless(expr: Expression, is_orderless: bool = True) -> Expression:
@@ -112,7 +110,7 @@ def apply_orderless(expr: Expression, is_orderless: bool = True) -> Expression:
 
     # Only create new expression if order changed
     if tuple(sorted_args) != expr.args:
-        return Expression(expr.head, *sorted_args, attributes=expr.attributes)
+        return Expression(expr.head, *sorted_args, _attrs=expr.attributes)
     return expr
 
 
@@ -137,14 +135,31 @@ def canonical_sort(elements: Tuple[Any, ...]) -> Tuple[Any, ...]:
             return (2, 0, 0, elem.name, 0)
         elif is_expr(elem):
             # Expressions: sort by depth and complexity
-            from minimatic.core import get_depth, leaf_count
-            depth = get_depth(elem)
-            leaves = leaf_count(elem)
+            depth = _get_depth(elem)
+            leaves = _leaf_count(elem)
             return (3, depth, leaves, str(elem), 0)
         else:
             return (4, 0, 0, str(elem), 0)
 
     return tuple(sorted(elements, key=sort_key))
+
+
+def _get_depth(expr: Any) -> int:
+    """Get the depth of an expression."""
+    if is_expr(expr):
+        if not expr.args:
+            return 1
+        return 1 + max(_get_depth(arg) for arg in expr.args)
+    return 0
+
+
+def _leaf_count(expr: Any) -> int:
+    """Count the leaves of an expression."""
+    if is_expr(expr):
+        if not expr.args:
+            return 1
+        return sum(_leaf_count(arg) for arg in expr.args)
+    return 1
 
 
 def apply_listable(expr: Expression, is_listable: bool = True) -> Expression:
@@ -191,6 +206,6 @@ def apply_listable(expr: Expression, is_listable: bool = True) -> Expression:
         new_args = list(expr.args)
         for list_pos in list_positions:
             new_args[list_pos] = expr.args[list_pos].args[elem_idx]
-        results.append(Expression(expr.head, *new_args, attributes=expr.attributes))
+        results.append(Expression(expr.head, *new_args, _attrs=expr.attributes))
 
     return Expression(List, *results)

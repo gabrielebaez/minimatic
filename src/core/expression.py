@@ -13,7 +13,7 @@ Implementation:
 Examples:
     Plus[1, 2, 3]  →  Expression(Plus, 1, 2, 3)
     f[x, y]       →  Expression(f, x, y)
-    Hold[x + 1]   →  Expression(Hold, Expression(Plus, x, 1), _attrs={HoldAll})
+    Hold[x + 1]   →  Expression(Hold, Expression(Plus, x, 1), _attrs={Hold})
 """
 
 from typing import (
@@ -68,8 +68,8 @@ class Expression(tuple):
             >>> Expression(Plus, 1, 2)
             Plus[1, 2]
 
-            >>> Expression(f, x, y, _attrs={HoldAll})
-            f[x, y]  # with HoldAll attribute
+            >>> Expression(f, x, y, _attrs={Hold})
+            f[x, y]  # with Hold attribute
         """
         # Validate head
         from .symbol import Symbol  # Local import to avoid circularity
@@ -128,30 +128,6 @@ class Expression(tuple):
     def __contains__(self, item: object) -> bool:
         """Check if item is in arguments."""
         return item in self.tail
-
-    @overload
-    def __getitem__(self, key: int) -> Element: ...
-    @overload
-    def __getitem__(self, key: slice) -> tuple[Element, ...]: ...
-
-    def __getitem__(self, key: Union[int, slice]) -> Union[Element, tuple[Element, ...]]:
-        """
-        Index into arguments.
-
-        Note: This indexes into tail (arguments), not the internal
-        (head, tail, attrs) structure. Use .head, .tail, .attributes
-        for direct component access.
-
-        Args:
-            key: Integer index or slice.
-
-        Returns:
-            Single argument or tuple of arguments.
-
-        Raises:
-            IndexError: If index is out of range.
-        """
-        return self.tail[key]
 
     def has_attr(self, attr: Symbol) -> bool:
         """

@@ -5,13 +5,11 @@ Provides symbol tables, attribute storage, and value storage
 with support for nested scopes and context chaining.
 """
 
-from __future__ import annotations
-
 import threading
 from collections.abc import Mapping
 from typing import Any, Optional
 
-from minimatic.core import Symbol, Expression #, Attritube
+from src.core import Symbol, Expression #, Attritube
 # from minimatic.core.attributes import get_attributes as get_base_attributes
 
 

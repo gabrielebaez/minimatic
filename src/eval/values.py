@@ -5,13 +5,11 @@ NValues, DefaultValues, and FormatValues.
 Implements the Wolfram Language value storage hierarchy.
 """
 
-from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import Any, Optional, Union
 
-from minimatic.core import Symbol, Expression
-from minimatic.pattern import Bindings, pattern
+from src.core import Symbol, Expression
+from src.pattern import Bindings, pattern
 
 
 # Type aliases for value entries

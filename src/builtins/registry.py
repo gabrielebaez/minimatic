@@ -5,18 +5,16 @@ Manages native implementations of system functions with their
 associated attributes and evaluation logic.
 """
 
-from __future__ import annotations
-
 import functools
 from dataclasses import dataclass
 from typing import Any, Callable, Optional, Dict, Set, TYPE_CHECKING
 
-from minimatic.core import Symbol, Expression #, Attribute
-from minimatic.core.attributes import HoldAll, HoldFirst, HoldRest, HoldAllComplete
-from minimatic.core.attributes import Listable, Flat, Orderless, NumericFunction
+from src.core import Symbol, Expression #, Attribute
+# from src.core.attributes import HoldAll, HoldFirst, HoldRest, HoldAllComplete
+from src.core.attributes import Listable, Flat, Orderless, NumericFunction
 
 if TYPE_CHECKING:
-    from minimatic.eval.context import EvaluationContext
+    from src.eval.context import EvaluationContext
 
 
 @dataclass

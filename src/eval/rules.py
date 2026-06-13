@@ -5,14 +5,12 @@ Implements Rule (->) and RuleDelayed (:>) with priority-based
 application order and condition checking.
 """
 
-from __future__ import annotations
-
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Any, Optional, Callable, Union
 
-from minimatic.core import Expression, Symbol, is_expr
-from minimatic.pattern import (
+from src.core import Expression, Symbol, is_expr
+from src.pattern import (
     match, replace_with_bindings, Bindings,
     MatchResult, NO_MATCH,
     pattern_name, is_pattern

@@ -44,22 +44,12 @@ Temporary = Symbol("Temporary")
 
 # HOLD ATTRIBUTES (Evaluation Control)
 
-HoldFirst = Symbol("HoldFirst")
+Hold = Symbol("Hold")
 """
-Don't evaluate the first argument.
+Don't evaluate the expression.
 
 Example:
-    SetDelayed has HoldFirst, so in f[x_] := x^2,
-    the pattern f[x_] is not evaluated.
-"""
-
-HoldRest = Symbol("HoldRest")
-"""
-Don't evaluate arguments after the first.
-
-Example:
-    If has HoldRest, so in If[cond, then, else],
-    only cond is evaluated initially.
+    Hold[1 + 1] keeps the expression unevaluated as Hold[1 + 1].
 """
 
 HoldAll = Symbol("HoldAll")
@@ -67,43 +57,40 @@ HoldAll = Symbol("HoldAll")
 Don't evaluate any arguments.
 
 Example:
-    Hold[expr] keeps expr completely unevaluated.
+    HoldAll[f[1+1]] keeps f[1+1] unevaluated.
+"""
+
+HoldFirst = Symbol("HoldFirst")
+"""
+Don't evaluate the first argument.
+
+Example:
+    HoldFirst[Set[x, 1+1]] keeps x unevaluated.
+"""
+
+HoldRest = Symbol("HoldRest")
+"""
+Don't evaluate arguments after the first.
+
+Example:
+    HoldRest[f[x, 1+1]] evaluates x but keeps 1+1 unevaluated.
 """
 
 HoldAllComplete = Symbol("HoldAllComplete")
 """
-Complete hold — don't evaluate anything, including the head.
-
-This is the strongest hold attribute. It also prevents:
-    - Sequence flattening
-    - UpValue application
+Completely prevent all evaluation, including head evaluation.
 
 Example:
-    HoldComplete[1 + 1] keeps the expression exactly as written.
+    HoldAllComplete[1+1] keeps 1+1 completely unevaluated.
 """
 
 SequenceHold = Symbol("SequenceHold")
 """
-Don't flatten Sequence objects in arguments.
+Prevent Sequence flattening.
 
-Normally Sequence[a, b] splices into the argument list:
-    f[1, Sequence[2, 3], 4] → f[1, 2, 3, 4]
-
-With SequenceHold, the Sequence is preserved.
+Example:
+    SequenceHold[f[Sequence[a, b]]] keeps the Sequence unevaluated.
 """
-
-
-# NUMERIC HOLD ATTRIBUTES
-
-NHoldFirst = Symbol("NHoldFirst")
-"""Don't apply N[] to the first argument."""
-
-NHoldRest = Symbol("NHoldRest")
-"""Don't apply N[] to arguments after the first."""
-
-NHoldAll = Symbol("NHoldAll")
-"""Don't apply N[] to any arguments."""
-
 
 # STRUCTURAL ATTRIBUTES
 
@@ -166,22 +153,6 @@ the package that defines it.
 
 # ATTRIBUTE SETS (for convenience)
 
-HOLD_ATTRIBUTES = frozenset({
-    HoldFirst,
-    HoldRest,
-    HoldAll,
-    HoldAllComplete,
-    SequenceHold,
-})
-"""All attributes that affect argument evaluation."""
-
-NHOLD_ATTRIBUTES = frozenset({
-    NHoldFirst,
-    NHoldRest,
-    NHoldAll,
-})
-"""All attributes that affect numeric evaluation."""
-
 STRUCTURAL_ATTRIBUTES = frozenset({
     Flat,
     Orderless,
@@ -199,11 +170,20 @@ PROTECTION_ATTRIBUTES = frozenset({
 })
 """All attributes related to symbol protection."""
 
+HOLD_ATTRIBUTES = frozenset({
+    Hold,
+    HoldAll,
+    HoldFirst,
+    HoldRest,
+    HoldAllComplete,
+    SequenceHold,
+})
+"""All attributes related to evaluation control."""
+
 ALL_ATTRIBUTES = (
-    HOLD_ATTRIBUTES 
-    | NHOLD_ATTRIBUTES 
-    | STRUCTURAL_ATTRIBUTES 
+    STRUCTURAL_ATTRIBUTES 
     | PROTECTION_ATTRIBUTES 
+    | HOLD_ATTRIBUTES
     | {NumericFunction, Stub}
 )
 """All defined attributes."""
@@ -224,24 +204,9 @@ def is_attribute(sym: Symbol) -> bool:
     return sym in ALL_ATTRIBUTES
 
 
-def holds_first(attrs: frozenset[Symbol]) -> bool:
-    """Check if attributes indicate first argument should be held."""
-    return bool(attrs & {HoldFirst, HoldAll, HoldAllComplete})
-
-
-def holds_rest(attrs: frozenset[Symbol]) -> bool:
-    """Check if attributes indicate arguments after first should be held."""
-    return bool(attrs & {HoldRest, HoldAll, HoldAllComplete})
-
-
 def holds_all(attrs: frozenset[Symbol]) -> bool:
     """Check if attributes indicate all arguments should be held."""
-    return bool(attrs & {HoldAll, HoldAllComplete})
-
-
-def holds_completely(attrs: frozenset[Symbol]) -> bool:
-    """Check if HoldAllComplete is set (strongest hold)."""
-    return HoldAllComplete in attrs
+    return bool(attrs & {Hold, HoldAll, HoldAllComplete})
 
 
 def is_flat(attrs: frozenset[Symbol]) -> bool:

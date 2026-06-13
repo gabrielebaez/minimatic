@@ -21,7 +21,6 @@ Note:
     allows natural interoperability with Python.
 """
 
-from __future__ import annotations
 from typing import Union
 
 from .symbol import Symbol
