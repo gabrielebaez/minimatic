@@ -5,13 +5,11 @@ Manages native implementations of system functions with their
 associated attributes and evaluation logic.
 """
 
-import functools
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Optional, Dict, Set, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from src.core import Symbol, Expression #, Attribute
-# from src.core.attributes import HoldAll, HoldFirst, HoldRest, HoldAllComplete
-from src.core.attributes import Listable, Flat, Orderless, NumericFunction
+from src.core import Expression, Symbol
 
 if TYPE_CHECKING:
     from src.eval.context import EvaluationContext
@@ -31,7 +29,7 @@ class BuiltinFunction:
 
     symbol: Symbol
     implementation: Callable[[Any, EvaluationContext], Any]
-    attributes: frozenset[Attribute]
+    attributes: frozenset[Symbol]
     auto_evaluate: bool = True
 
     def __call__(self, expr: Expression, context: EvaluationContext) -> Any:
@@ -40,13 +38,11 @@ class BuiltinFunction:
 
 
 # Global registry mapping Symbol -> BuiltinFunction
-_registry: Dict[Symbol, BuiltinFunction] = {}
+_registry: dict[Symbol, BuiltinFunction] = {}
 
 
 def register_builtin(
-    sym: Symbol,
-    attributes: Optional[Set[Attribute]] = None,
-    auto_evaluate: bool = True
+    sym: Symbol, attributes: set[Symbol] | None = None, auto_evaluate: bool = True
 ) -> Callable[[Callable], Callable]:
     """
     Decorator to register a function as a built-in.
@@ -61,10 +57,7 @@ def register_builtin(
 
     def decorator(func: Callable[[Any, EvaluationContext], Any]) -> Callable:
         builtin = BuiltinFunction(
-            symbol=sym,
-            implementation=func,
-            attributes=attrs,
-            auto_evaluate=auto_evaluate
+            symbol=sym, implementation=func, attributes=attrs, auto_evaluate=auto_evaluate
         )
         _registry[sym] = builtin
         return func
@@ -72,7 +65,7 @@ def register_builtin(
     return decorator
 
 
-def get_builtin(sym: Symbol) -> Optional[BuiltinFunction]:
+def get_builtin(sym: Symbol) -> BuiltinFunction | None:
     """Get the built-in implementation for a symbol, if registered."""
     return _registry.get(sym)
 
@@ -82,7 +75,7 @@ def has_builtin(sym: Symbol) -> bool:
     return sym in _registry
 
 
-def builtin_attributes(sym: Symbol) -> frozenset[Attribute]:
+def builtin_attributes(sym: Symbol) -> frozenset[Symbol]:
     """Get the attributes associated with a built-in symbol."""
     builtin = _registry.get(sym)
     if builtin:
@@ -102,17 +95,16 @@ class BuiltinRegistry:
     Allows extending or overriding built-ins in a specific context.
     """
 
-    def __init__(self, parent: Optional[BuiltinRegistry] = None):
+    def __init__(self, parent: BuiltinRegistry | None = None):
         self.parent = parent
-        self._local: Dict[Symbol, BuiltinFunction] = {}
+        self._local: dict[Symbol, BuiltinFunction] = {}
 
-    def register(self, sym: Symbol, impl: Callable, 
-                 attributes: Optional[Set[Attribute]] = None) -> None:
+    def register(self, sym: Symbol, impl: Callable, attributes: set[Symbol] | None = None) -> None:
         """Register a built-in in this registry."""
         attrs = frozenset(attributes) if attributes else frozenset()
         self._local[sym] = BuiltinFunction(sym, impl, attrs)
 
-    def get(self, sym: Symbol) -> Optional[BuiltinFunction]:
+    def get(self, sym: Symbol) -> BuiltinFunction | None:
         """Get built-in, checking local then parent."""
         if sym in self._local:
             return self._local[sym]

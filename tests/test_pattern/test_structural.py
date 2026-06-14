@@ -1,21 +1,53 @@
 """Tests for Structural patterns module."""
+
 from __future__ import annotations
 
 import pytest
-from src.core.symbol import Symbol
+
 from src.core.expression import Expression
-from src.pattern.blanks import blank, blank_seq, Blank, BlankSequence
+from src.core.symbol import Symbol
+from src.pattern.blanks import Blank, blank, blank_seq
 from src.pattern.structural import (
-    Pattern, Condition, Alternatives, PatternTest, Optional as OptionalPattern,
-    Repeated, RepeatedNull, Except, Verbatim, HoldPattern,
-    pattern, condition, alternatives, pattern_test, optional,
-    repeated, repeated_null, except_pattern, verbatim, hold_pattern,
-    is_pattern, is_condition, is_alternatives, is_pattern_test,
-    is_optional, is_repeated, is_repeated_null, is_except,
-    is_verbatim, is_hold_pattern, is_pattern_construct,
-    pattern_name, pattern_blank, get_default_value,
-    get_condition_test, get_condition_pattern,
-    unwrap_hold_pattern, collect_pattern_names,
+    Alternatives,
+    Condition,
+    Except,
+    HoldPattern,
+    Pattern,
+    PatternTest,
+    Repeated,
+    RepeatedNull,
+    Verbatim,
+    alternatives,
+    collect_pattern_names,
+    condition,
+    except_pattern,
+    get_condition_pattern,
+    get_condition_test,
+    get_default_value,
+    hold_pattern,
+    is_alternatives,
+    is_condition,
+    is_except,
+    is_hold_pattern,
+    is_optional,
+    is_pattern,
+    is_pattern_construct,
+    is_pattern_test,
+    is_repeated,
+    is_repeated_null,
+    is_verbatim,
+    optional,
+    pattern,
+    pattern_blank,
+    pattern_name,
+    pattern_test,
+    repeated,
+    repeated_null,
+    unwrap_hold_pattern,
+    verbatim,
+)
+from src.pattern.structural import (
+    Optional as OptionalPattern,
 )
 
 x = Symbol("x")

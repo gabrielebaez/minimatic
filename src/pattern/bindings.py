@@ -26,14 +26,10 @@ Usage:
 """
 
 # from __future__ import annotations
+from collections.abc import Iterator, Mapping
 from typing import (
-    Dict,
-    Optional,
-    Iterator,
-    Mapping,
-    Any,
-    Union,
     TYPE_CHECKING,
+    Any,
 )
 
 if TYPE_CHECKING:
@@ -41,10 +37,10 @@ if TYPE_CHECKING:
 
 from src.core.symbol import Symbol
 
-
 # ═══════════════════════════════════════════════════════════════════════════════
 # BINDINGS CLASS
 # ═══════════════════════════════════════════════════════════════════════════════
+
 
 class Bindings(Mapping[Symbol, "Element"]):
     """
@@ -76,11 +72,11 @@ class Bindings(Mapping[Symbol, "Element"]):
         _index: Dict for O(1) lookup (derived from _pairs).
     """
 
-    __slots__ = ('_pairs', '_index', '_hash')
+    __slots__ = ("_pairs", "_index", "_hash")
 
     def __init__(
         self,
-        data: Optional[Union[Dict[Symbol, "Element"], "Bindings"]] = None,
+        data: dict[Symbol, Element] | Bindings | None = None,
     ) -> None:
         """
         Create a Bindings object.
@@ -93,29 +89,23 @@ class Bindings(Mapping[Symbol, "Element"]):
             TypeError: If keys are not Symbols.
         """
         if data is None:
-            self._pairs: frozenset[tuple[Symbol, "Element"]] = frozenset()
-            self._index: Dict[Symbol, "Element"] = {}
+            self._pairs: frozenset[tuple[Symbol, Element]] = frozenset()
+            self._index: dict[Symbol, Element] = {}
         elif isinstance(data, Bindings):
             self._pairs = data._pairs
             self._index = dict(data._index)
         elif isinstance(data, dict):
             for key in data:
                 if not isinstance(key, Symbol):
-                    raise TypeError(
-                        f"Bindings keys must be Symbols, got {type(key).__name__}"
-                    )
+                    raise TypeError(f"Bindings keys must be Symbols, got {type(key).__name__}")
             self._pairs = frozenset(data.items())
             self._index = dict(data)
         else:
-            raise TypeError(
-                f"Bindings data must be dict or Bindings, got {type(data).__name__}"
-            )
-        self._hash: Optional[int] = None
+            raise TypeError(f"Bindings data must be dict or Bindings, got {type(data).__name__}")
+        self._hash: int | None = None
 
     @classmethod
-    def _from_parts(
-        cls, pairs: frozenset[tuple[Symbol, "Element"]]
-    ) -> "Bindings":
+    def _from_parts(cls, pairs: frozenset[tuple[Symbol, Element]]) -> Bindings:
         """Construct directly from frozenset (internal use)."""
         obj = object.__new__(cls)
         obj._pairs = pairs
@@ -127,7 +117,7 @@ class Bindings(Mapping[Symbol, "Element"]):
     # Mapping Protocol
     # ─────────────────────────────────────────────────────────────────────────
 
-    def __getitem__(self, key: Symbol) -> "Element":
+    def __getitem__(self, key: Symbol) -> Element:
         """Get the value bound to a symbol."""
         return self._index[key]
 
@@ -163,7 +153,7 @@ class Bindings(Mapping[Symbol, "Element"]):
     # Immutable Modification Operations
     # ─────────────────────────────────────────────────────────────────────────
 
-    def bind(self, name: Symbol, value: "Element") -> "Bindings":
+    def bind(self, name: Symbol, value: Element) -> Bindings:
         """
         Create new Bindings with an additional binding.
 
@@ -181,9 +171,7 @@ class Bindings(Mapping[Symbol, "Element"]):
             BindingConflict: If name is bound to a different value.
         """
         if not isinstance(name, Symbol):
-            raise TypeError(
-                f"Binding name must be Symbol, got {type(name).__name__}"
-            )
+            raise TypeError(f"Binding name must be Symbol, got {type(name).__name__}")
 
         if name in self._index:
             existing = self._index[name]
@@ -193,7 +181,7 @@ class Bindings(Mapping[Symbol, "Element"]):
 
         return Bindings._from_parts(self._pairs | frozenset({(name, value)}))
 
-    def bind_all(self, bindings: Mapping[Symbol, "Element"]) -> "Bindings":
+    def bind_all(self, bindings: Mapping[Symbol, Element]) -> Bindings:
         """
         Create new Bindings with multiple additional bindings.
 
@@ -211,7 +199,7 @@ class Bindings(Mapping[Symbol, "Element"]):
             result = result.bind(name, value)
         return result
 
-    def unbind(self, name: Symbol) -> "Bindings":
+    def unbind(self, name: Symbol) -> Bindings:
         """
         Create new Bindings without a specific binding.
 
@@ -224,12 +212,10 @@ class Bindings(Mapping[Symbol, "Element"]):
         if name not in self._index:
             return self
 
-        new_pairs = frozenset(
-            (k, v) for k, v in self._pairs if k != name
-        )
+        new_pairs = frozenset((k, v) for k, v in self._pairs if k != name)
         return Bindings._from_parts(new_pairs)
 
-    def merge(self, other: "Bindings") -> "Bindings":
+    def merge(self, other: Bindings) -> Bindings:
         """
         Merge with another Bindings object.
 
@@ -275,20 +261,14 @@ class Bindings(Mapping[Symbol, "Element"]):
         """Detailed representation."""
         if not self._pairs:
             return "Bindings({})"
-        items = ", ".join(
-            f"{k}: {v!r}"
-            for k, v in sorted(self._pairs, key=lambda p: str(p[0]))
-        )
+        items = ", ".join(f"{k}: {v!r}" for k, v in sorted(self._pairs, key=lambda p: str(p[0])))
         return f"Bindings({{{items}}})"
 
     def __str__(self) -> str:
         """Human-readable representation."""
         if not self._pairs:
             return "{}"
-        items = ", ".join(
-            f"{k} → {v}"
-            for k, v in sorted(self._pairs, key=lambda p: str(p[0]))
-        )
+        items = ", ".join(f"{k} → {v}" for k, v in sorted(self._pairs, key=lambda p: str(p[0])))
         return f"{{{items}}}"
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -303,11 +283,11 @@ class Bindings(Mapping[Symbol, "Element"]):
     # Utility Methods
     # ─────────────────────────────────────────────────────────────────────────
 
-    def to_dict(self) -> Dict[Symbol, "Element"]:
+    def to_dict(self) -> dict[Symbol, Element]:
         """Convert to a regular dictionary (copy)."""
         return dict(self._index)
 
-    def is_compatible_with(self, other: "Bindings") -> bool:
+    def is_compatible_with(self, other: Bindings) -> bool:
         """
         Check if this bindings can be merged with another without conflict.
 
@@ -327,6 +307,7 @@ class Bindings(Mapping[Symbol, "Element"]):
 # BINDING CONFLICT EXCEPTION
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
 class BindingConflict(Exception):
     """
     Exception raised when attempting to bind a name to conflicting values.
@@ -341,16 +322,14 @@ class BindingConflict(Exception):
         self.name = name
         self.existing = existing
         self.new = new
-        super().__init__(
-            f"Cannot bind {name} to {new!r}: already bound to {existing!r}"
-        )
+        super().__init__(f"Cannot bind {name} to {new!r}: already bound to {existing!r}")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # FACTORY FUNCTIONS
 # ═══════════════════════════════════════════════════════════════════════════════
 
-_EMPTY_BINDINGS: Optional[Bindings] = None
+_EMPTY_BINDINGS: Bindings | None = None
 
 
 def empty_bindings() -> Bindings:
@@ -364,7 +343,7 @@ def empty_bindings() -> Bindings:
     return _EMPTY_BINDINGS
 
 
-def single_binding(name: Symbol, value: "Element") -> Bindings:
+def single_binding(name: Symbol, value: Element) -> Bindings:
     """
     Create Bindings with a single binding.
     """
@@ -374,6 +353,7 @@ def single_binding(name: Symbol, value: "Element") -> Bindings:
 # ═══════════════════════════════════════════════════════════════════════════════
 # UTILITY FUNCTIONS
 # ═══════════════════════════════════════════════════════════════════════════════
+
 
 def merge_bindings(b1: Bindings, b2: Bindings) -> Bindings:
     """
@@ -389,7 +369,7 @@ def bindings_compatible(b1: Bindings, b2: Bindings) -> bool:
     return b1.is_compatible_with(b2)
 
 
-def bindings_from_pairs(*pairs: tuple[Symbol, "Element"]) -> Bindings:
+def bindings_from_pairs(*pairs: tuple[Symbol, Element]) -> Bindings:
     """
     Create Bindings from (symbol, value) pairs.
     """

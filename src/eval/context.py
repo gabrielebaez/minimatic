@@ -7,10 +7,9 @@ with support for nested scopes and context chaining.
 
 import threading
 from collections.abc import Mapping
-from typing import Any, Optional
+from typing import Any
 
-from src.core import Symbol, Expression #, Attritube
-# from minimatic.core.attributes import get_attributes as get_base_attributes
+from src.core import Symbol
 
 
 class EvaluationContext:
@@ -23,7 +22,7 @@ class EvaluationContext:
     Contexts can be chained for nested scopes (local variables).
     """
 
-    def __init__(self, name: str = "Global", parent: Optional[EvaluationContext] = None):
+    def __init__(self, name: str = "Global", parent: EvaluationContext | None = None):
         self.name = name
         self.parent = parent
 
@@ -42,7 +41,7 @@ class EvaluationContext:
         self._default_values: dict[Symbol, Any] = {}
         self._format_values: dict[Symbol, list] = {}
 
-    def get_symbol(self, name: str) -> Optional[Symbol]:
+    def get_symbol(self, name: str) -> Symbol | None:
         """Get symbol by name, checking parent contexts if not found."""
         if name in self._symbols:
             return self._symbols[name]
@@ -122,9 +121,15 @@ class EvaluationContext:
 
     def clear_all_values(self, sym: Symbol) -> None:
         """Clear all values for a symbol."""
-        for store in [self._own_values, self._down_values, self._up_values,
-                      self._sub_values, self._n_values, self._default_values,
-                      self._format_values]:
+        for store in [
+            self._own_values,
+            self._down_values,
+            self._up_values,
+            self._sub_values,
+            self._n_values,
+            self._default_values,
+            self._format_values,
+        ]:
             if sym in store:
                 del store[sym]
 

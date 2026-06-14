@@ -6,10 +6,10 @@ Wolfram Language semantics with proper attribute handling.
 """
 
 import math
-from typing import Any, List
+from typing import Any
 
-from src.core import Symbol, Expression, is_expr
-from src.core.attributes import Flat, Orderless, Listable, NumericFunction, HoldRest
+from src.core import Expression, Symbol, is_expr
+from src.core.attributes import Flat, HoldRest, Listable, NumericFunction, Orderless
 from src.eval.context import EvaluationContext
 
 from .registry import register_builtin
@@ -36,7 +36,7 @@ def is_complex(x: Any) -> bool:
     return isinstance(x, complex)
 
 
-def flatten_associative(args: List[Any], identity: Any) -> List[Any]:
+def flatten_associative(args: list[Any], identity: Any) -> list[Any]:
     """Flatten nested associative operations (for Flat attribute)."""
     result = []
     for arg in args:
@@ -46,7 +46,7 @@ def flatten_associative(args: List[Any], identity: Any) -> List[Any]:
     return result
 
 
-def numeric_plus(args: List[Any]) -> Any:
+def numeric_plus(args: list[Any]) -> Any:
     """Compute numeric sum of arguments."""
     total = 0
     symbolic = []
@@ -63,7 +63,7 @@ def numeric_plus(args: List[Any]) -> Any:
     return symbolic if len(symbolic) > 1 else (symbolic[0] if symbolic else 0)
 
 
-def numeric_times(args: List[Any]) -> Any:
+def numeric_times(args: list[Any]) -> Any:
     """Compute numeric product of arguments."""
     prod = 1
     symbolic = []
@@ -90,11 +90,8 @@ def numeric_times(args: List[Any]) -> Any:
 
 Plus = Symbol("Plus")
 
-@register_builtin(
-    Plus,
-    attributes={Flat, Orderless, Listable, NumericFunction},
-    auto_evaluate=True
-)
+
+@register_builtin(Plus, attributes={Flat, Orderless, Listable, NumericFunction}, auto_evaluate=True)
 def plus_builtin(expr: Expression, context: EvaluationContext) -> Any:
     """
     Implement Plus with Wolfram Language semantics.
@@ -129,10 +126,6 @@ def plus_builtin(expr: Expression, context: EvaluationContext) -> Any:
             coeff, rest = extract_numeric_coefficient(arg)
             if coeff is not None:
                 if coeff != 1 or not rest:
-                    if rest:
-                        term = (Times, coeff, rest)
-                    else:
-                        term = coeff
                     # Combine like terms would go here
                     symbolic_terms.append(arg)  # Simplified
                 else:
@@ -199,10 +192,9 @@ def extract_numeric_coefficient(expr: Expression) -> tuple:
 
 Times = Symbol("Times")
 
+
 @register_builtin(
-    Times,
-    attributes={Flat, Orderless, Listable, NumericFunction},
-    auto_evaluate=True
+    Times, attributes={Flat, Orderless, Listable, NumericFunction}, auto_evaluate=True
 )
 def times_builtin(expr: Expression, context: EvaluationContext) -> Any:
     """
@@ -266,10 +258,11 @@ def times_builtin(expr: Expression, context: EvaluationContext) -> Any:
 
 Power = Symbol("Power")
 
+
 @register_builtin(
     Power,
     attributes={NumericFunction, Listable},  # NOT Flat or Orderless
-    auto_evaluate=True
+    auto_evaluate=True,
 )
 def power_builtin(expr: Expression, context: EvaluationContext) -> Any:
     """
@@ -292,10 +285,9 @@ def power_builtin(expr: Expression, context: EvaluationContext) -> Any:
     if is_number(base) and is_number(exp):
         try:
             # Handle special cases
-            if base == 0:
-                if exp > 0:
-                    return 0
-                # 0^0 or 0^negative is undefined or infinity
+            if base == 0 and exp > 0:
+                return 0
+            # 0^0 or 0^negative is undefined or infinity
             if base == 1:
                 return 1
             if exp == 0:
@@ -303,13 +295,13 @@ def power_builtin(expr: Expression, context: EvaluationContext) -> Any:
             if exp == 1:
                 return base
 
-            result = base ** exp
+            result = base**exp
 
             # Convert to int if it's a whole number
             if isinstance(result, float) and result.is_integer():
                 return int(result)
             return result
-        except (OverflowError, ZeroDivisionError):
+        except OverflowError, ZeroDivisionError:
             return Expression(Power, base, exp)
 
     # Symbolic simplifications
@@ -329,11 +321,8 @@ def power_builtin(expr: Expression, context: EvaluationContext) -> Any:
 
 Minus = Symbol("Minus")
 
-@register_builtin(
-    Minus,
-    attributes={Listable, NumericFunction},
-    auto_evaluate=True
-)
+
+@register_builtin(Minus, attributes={Listable, NumericFunction}, auto_evaluate=True)
 def minus_builtin(expr: Expression, context: EvaluationContext) -> Any:
     """Unary minus: -x implemented as Times[-1, x]."""
     args = list(expr.args)
@@ -351,11 +340,8 @@ def minus_builtin(expr: Expression, context: EvaluationContext) -> Any:
 
 Divide = Symbol("Divide")
 
-@register_builtin(
-    Divide,
-    attributes={Listable, NumericFunction},
-    auto_evaluate=True
-)
+
+@register_builtin(Divide, attributes={Listable, NumericFunction}, auto_evaluate=True)
 def divide_builtin(expr: Expression, context: EvaluationContext) -> Any:
     """Division: a / b implemented as Times[a, Power[b, -1]]."""
     args = list(expr.args)
@@ -376,11 +362,8 @@ def divide_builtin(expr: Expression, context: EvaluationContext) -> Any:
 
 Subtract = Symbol("Subtract")
 
-@register_builtin(
-    Subtract,
-    attributes={Listable, NumericFunction},
-    auto_evaluate=True
-)
+
+@register_builtin(Subtract, attributes={Listable, NumericFunction}, auto_evaluate=True)
 def subtract_builtin(expr: Expression, context: EvaluationContext) -> Any:
     """Subtraction: a - b implemented as Plus[a, Times[-1, b]]."""
     args = list(expr.args)
@@ -398,11 +381,8 @@ def subtract_builtin(expr: Expression, context: EvaluationContext) -> Any:
 
 Abs = Symbol("Abs")
 
-@register_builtin(
-    Abs,
-    attributes={Listable, NumericFunction},
-    auto_evaluate=True
-)
+
+@register_builtin(Abs, attributes={Listable, NumericFunction}, auto_evaluate=True)
 def abs_builtin(expr: Expression, context: EvaluationContext) -> Any:
     """Absolute value."""
     args = list(expr.args)
@@ -422,11 +402,7 @@ def abs_builtin(expr: Expression, context: EvaluationContext) -> Any:
         # Extract sign
         first = arg.args[0]
         if is_number(first) and first < 0:
-            rest = arg.args[1:] if len(arg.args) > 2 else arg.args[1]
-            if len(arg.args) == 2:
-                rest = arg.args[1]
-            else:
-                rest = Expression(Times, *arg.args[1:])
+            rest = arg.args[1] if len(arg.args) == 2 else Expression(Times, *arg.args[1:])
             return Expression(Abs, Expression(Times, -first, rest))
 
     return Expression(Abs, arg)
@@ -436,11 +412,8 @@ def abs_builtin(expr: Expression, context: EvaluationContext) -> Any:
 
 Sqrt = Symbol("Sqrt")
 
-@register_builtin(
-    Sqrt,
-    attributes={Listable, NumericFunction},
-    auto_evaluate=True
-)
+
+@register_builtin(Sqrt, attributes={Listable, NumericFunction}, auto_evaluate=True)
 def sqrt_builtin(expr: Expression, context: EvaluationContext) -> Any:
     """Square root: Sqrt[x] == Power[x, 1/2]."""
     args = list(expr.args)
@@ -460,18 +433,15 @@ def sqrt_builtin(expr: Expression, context: EvaluationContext) -> Any:
         # Negative: complex result
         return complex(arg) ** 0.5
 
-    return Expression(Power, arg, Symbol("Rational")(1, 2) if False else 0.5)
+    return Expression(Power, arg, 0.5)
 
 
 # ----- Exp -----
 
 Exp = Symbol("Exp")
 
-@register_builtin(
-    Exp,
-    attributes={Listable, NumericFunction},
-    auto_evaluate=True
-)
+
+@register_builtin(Exp, attributes={Listable, NumericFunction}, auto_evaluate=True)
 def exp_builtin(expr: Expression, context: EvaluationContext) -> Any:
     """Exponential function: E^x."""
     args = list(expr.args)
@@ -495,11 +465,8 @@ def exp_builtin(expr: Expression, context: EvaluationContext) -> Any:
 
 Log = Symbol("Log")
 
-@register_builtin(
-    Log,
-    attributes={Listable, NumericFunction},
-    auto_evaluate=True
-)
+
+@register_builtin(Log, attributes={Listable, NumericFunction}, auto_evaluate=True)
 def log_builtin(expr: Expression, context: EvaluationContext) -> Any:
     """
     Natural logarithm: Log[x] or Log[b, z] for base b.
@@ -513,16 +480,24 @@ def log_builtin(expr: Expression, context: EvaluationContext) -> Any:
             if is_real(arg) and arg > 0:
                 return math.log(arg)
             # Complex or negative
-            return complex(arg).log() if hasattr(complex(arg), 'log') else math.log(abs(arg), math.e)
+            return (
+                complex(arg).log() if hasattr(complex(arg), "log") else math.log(abs(arg), math.e)
+            )
         return Expression(Log, arg)
 
     elif len(args) == 2:
         # Log base b of z
         base, arg = args
-        if is_number(base) and is_number(arg):
-            if is_real(base) and is_real(arg) and base > 0 and arg > 0:
-                return math.log(arg, base)
-        return Expression(Log, arg, base) / Expression(Log, base) if False else expr
+        if (
+            is_number(base)
+            and is_number(arg)
+            and is_real(base)
+            and is_real(arg)
+            and base > 0
+            and arg > 0
+        ):
+            return math.log(arg, base)
+        return expr
 
     return expr
 
@@ -531,10 +506,11 @@ def log_builtin(expr: Expression, context: EvaluationContext) -> Any:
 
 Sum = Symbol("Sum")
 
+
 @register_builtin(
     Sum,
     attributes={HoldRest},  # Hold iterator specifications
-    auto_evaluate=False
+    auto_evaluate=False,
 )
 def sum_builtin(expr: Expression, context: EvaluationContext) -> Any:
     """
@@ -570,7 +546,7 @@ def sum_builtin(expr: Expression, context: EvaluationContext) -> Any:
                 for i in range(1, imax + 1):
                     # Substitute and evaluate
                     from src.pattern import replace_with_bindings
-                    from src.pattern import MatchResult, Bindings
+
                     substituted = replace_with_bindings(summand, {var: i})
                     result += evaluate(substituted, context)
                 return result
@@ -583,11 +559,8 @@ def sum_builtin(expr: Expression, context: EvaluationContext) -> Any:
 
 Product = Symbol("Product")
 
-@register_builtin(
-    Product,
-    attributes={HoldRest},
-    auto_evaluate=False
-)
+
+@register_builtin(Product, attributes={HoldRest}, auto_evaluate=False)
 def product_builtin(expr: Expression, context: EvaluationContext) -> Any:
     """Product: Product[expr, {i, imin, imax}]."""
     from src.eval import evaluate
@@ -617,6 +590,7 @@ def product_builtin(expr: Expression, context: EvaluationContext) -> Any:
             if is_integer(imax) and imax > 0:
                 for i in range(1, imax + 1):
                     from src.pattern import replace_with_bindings
+
                     substituted = replace_with_bindings(factor, {var: i})
                     result *= evaluate(substituted, context)
                 return result

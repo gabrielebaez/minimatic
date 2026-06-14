@@ -1,11 +1,23 @@
 """Tests for Atoms module."""
+
 from __future__ import annotations
 
 import pytest
+
 from src.core.atoms import (
-    is_atom, is_integer, is_real, is_complex, is_string,
-    is_boolean, is_null, is_numeric, is_exact, is_inexact,
-    atom_head, to_numeric, numeric_tower_promote,
+    atom_head,
+    is_atom,
+    is_boolean,
+    is_complex,
+    is_exact,
+    is_inexact,
+    is_integer,
+    is_null,
+    is_numeric,
+    is_real,
+    is_string,
+    numeric_tower_promote,
+    to_numeric,
 )
 from src.core.symbol import Symbol
 
@@ -18,7 +30,7 @@ class TestTypePredicates:
         assert is_atom(3.14)
 
     def test_is_atom_complex(self):
-        assert is_atom(1+2j)
+        assert is_atom(1 + 2j)
 
     def test_is_atom_string(self):
         assert is_atom("hello")
@@ -41,10 +53,10 @@ class TestTypePredicates:
     def test_is_real(self):
         assert is_real(3.14)
         assert not is_real(42)  # int is not float
-        assert not is_real(1+2j)
+        assert not is_real(1 + 2j)
 
     def test_is_complex(self):
-        assert is_complex(1+2j)
+        assert is_complex(1 + 2j)
         assert not is_complex(42)
 
     def test_is_string(self):
@@ -63,7 +75,7 @@ class TestTypePredicates:
     def test_is_numeric(self):
         assert is_numeric(42)
         assert is_numeric(3.14)
-        assert is_numeric(1+2j)
+        assert is_numeric(1 + 2j)
         assert not is_numeric(True)
         assert not is_numeric("x")
 
@@ -73,7 +85,7 @@ class TestTypePredicates:
 
     def test_is_inexact(self):
         assert is_inexact(3.14)
-        assert is_inexact(1+2j)
+        assert is_inexact(1 + 2j)
         assert not is_inexact(42)
 
 
@@ -85,7 +97,7 @@ class TestAtomHead:
         assert atom_head(3.14) == Symbol("Real")
 
     def test_complex(self):
-        assert atom_head(1+2j) == Symbol("Complex")
+        assert atom_head(1 + 2j) == Symbol("Complex")
 
     def test_string(self):
         assert atom_head("hello") == Symbol("String")
@@ -109,7 +121,7 @@ class TestToNumeric:
         assert to_numeric(3.14) == 3.14
 
     def test_complex(self):
-        assert to_numeric(1+2j) == 1+2j
+        assert to_numeric(1 + 2j) == 1 + 2j
 
     def test_string_int(self):
         assert to_numeric("42") == 42
@@ -128,10 +140,10 @@ class TestToNumeric:
 
 class TestNumericTower:
     def test_all_int(self):
-        assert numeric_tower_promote(1, 2, 3) == int
+        assert numeric_tower_promote(1, 2, 3) is int
 
     def test_has_float(self):
-        assert numeric_tower_promote(1, 2.0, 3) == float
+        assert numeric_tower_promote(1, 2.0, 3) is float
 
     def test_has_complex(self):
-        assert numeric_tower_promote(1, 2+3j) == complex
+        assert numeric_tower_promote(1, 2 + 3j) is complex

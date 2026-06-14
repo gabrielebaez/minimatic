@@ -21,10 +21,10 @@ src/
     blanks.py      Wildcard patterns (_, __, ___)
     structural.py  Pattern, Condition, Alternatives, PatternTest, Optional, ...
     bindings.py    Immutable match result bindings
-    matcher.py     Core matching engine with Flat/Orderless support
+    matcher.py     Core matching engine
 
   eval/          Evaluation engine
-    evaluator.py   Standard evaluation procedure (10-step loop)
+    evaluator.py   Standard evaluation procedure
     context.py     Evaluation contexts with scoping
     rules.py       Rule and RuleDelayed types
     values.py      OwnValues, DownValues, UpValues, SubValues, NValues
@@ -110,9 +110,10 @@ from src.core import Symbol, Expression
 from src.eval import evaluate, GlobalContext
 
 ctx = GlobalContext
+
 Plus = Symbol("Plus")
 
-evaluate(Expression(Plus, 1, 2, 3), ctx)                  # 6
+evaluate(Expression(Plus, 1, 2, 3), ctx)                   # 6
 evaluate(Expression(Plus, Expression(Plus, 1, 2), 3), ctx) # 6 (Flat)
 ```
 

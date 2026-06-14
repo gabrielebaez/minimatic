@@ -1,14 +1,12 @@
 """Tests for Arithmetic builtins module."""
-from __future__ import annotations
 
-import pytest
-from src.core.symbol import Symbol
-from src.core.expression import Expression, is_expr
-from src.eval.context import EvaluationContext
-from src.eval.evaluator import evaluate
+from __future__ import annotations
 
 # Force registration of builtins
 import src.builtins.arithmetic  # noqa: F401
+from src.core.expression import Expression, is_expr
+from src.core.symbol import Symbol
+from src.eval.evaluator import evaluate
 
 Plus = Symbol("Plus")
 Times = Symbol("Times")
@@ -22,11 +20,6 @@ Exp = Symbol("Exp")
 Log = Symbol("Log")
 Sum = Symbol("Sum")
 Product = Symbol("Product")
-
-
-@pytest.fixture
-def ctx():
-    return EvaluationContext("test")
 
 
 class TestPlus:
@@ -128,6 +121,7 @@ class TestSqrt:
 class TestExp:
     def test_exp_numeric(self, ctx):
         import math
+
         result = evaluate(Expression(Exp, 1), ctx)
         assert abs(result - math.e) < 1e-10
 
@@ -143,6 +137,7 @@ class TestLog:
 
     def test_log_e(self, ctx):
         import math
+
         result = evaluate(Expression(Log, math.e), ctx)
         assert abs(result - 1) < 1e-10
 

@@ -24,14 +24,13 @@ Examples:
 """
 
 # from __future__ import annotations
-from typing import Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from src.core.atoms import Element
 
+from src.core.expression import Expression, head_of, is_expr
 from src.core.symbol import Symbol
-from src.core.expression import Expression, is_expr, head_of
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # BLANK HEAD SYMBOLS
@@ -52,7 +51,8 @@ BlankNullSequence = Symbol("BlankNullSequence")
 # BLANK CONSTRUCTORS
 # ═══════════════════════════════════════════════════════════════════════════════
 
-def blank(head: Optional[Symbol] = None) -> Expression:
+
+def blank(head: Symbol | None = None) -> Expression:
     """
     Create a Blank pattern that matches any single expression.
 
@@ -82,7 +82,7 @@ def blank(head: Optional[Symbol] = None) -> Expression:
     return Expression(Blank, head)
 
 
-def blank_seq(head: Optional[Symbol] = None) -> Expression:
+def blank_seq(head: Symbol | None = None) -> Expression:
     """
     Create a BlankSequence pattern that matches one or more expressions.
 
@@ -109,7 +109,7 @@ def blank_seq(head: Optional[Symbol] = None) -> Expression:
     return Expression(BlankSequence, head)
 
 
-def blank_null_seq(head: Optional[Symbol] = None) -> Expression:
+def blank_null_seq(head: Symbol | None = None) -> Expression:
     """
     Create a BlankNullSequence pattern that matches zero or more expressions.
 
@@ -132,13 +132,16 @@ def blank_null_seq(head: Optional[Symbol] = None) -> Expression:
     if head is None:
         return Expression(BlankNullSequence)
     if not isinstance(head, Symbol):
-        raise TypeError(f"BlankNullSequence head constraint must be Symbol, got {type(head).__name__}")
+        raise TypeError(
+            f"BlankNullSequence head constraint must be Symbol, got {type(head).__name__}"
+        )
     return Expression(BlankNullSequence, head)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # TYPE PREDICATES
 # ═══════════════════════════════════════════════════════════════════════════════
+
 
 def is_blank(obj: object) -> bool:
     """
@@ -234,7 +237,8 @@ def is_sequence_blank(obj: object) -> bool:
 # BLANK UTILITIES
 # ═══════════════════════════════════════════════════════════════════════════════
 
-def blank_head_constraint(blank_expr: Expression) -> Optional[Symbol]:
+
+def blank_head_constraint(blank_expr: Expression) -> Symbol | None:
     """
     Get the head constraint of a blank pattern.
 
@@ -261,7 +265,7 @@ def blank_head_constraint(blank_expr: Expression) -> Optional[Symbol]:
     return blank_expr.args[0]
 
 
-def blank_matches_head(blank_expr: Expression, elem: "Element") -> bool:
+def blank_matches_head(blank_expr: Expression, elem: Element) -> bool:
     """
     Check if an element's head satisfies a blank's head constraint.
 
@@ -309,7 +313,7 @@ def blank_min_length(blank_expr: Expression) -> int:
     return 1  # Blank and BlankSequence both require at least 1
 
 
-def blank_max_length(blank_expr: Expression) -> Union[int, float]:
+def blank_max_length(blank_expr: Expression) -> int | float:
     """
     Get the maximum number of elements a blank pattern can match.
 
@@ -327,7 +331,7 @@ def blank_max_length(blank_expr: Expression) -> Union[int, float]:
 
     if blank_expr.head == Blank:
         return 1
-    return float('inf')  # BlankSequence and BlankNullSequence
+    return float("inf")  # BlankSequence and BlankNullSequence
 
 
 def blank_can_match_empty(blank_expr: Expression) -> bool:

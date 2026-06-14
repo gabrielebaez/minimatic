@@ -9,66 +9,58 @@ This module provides the foundational types:
 All core types are tuple-based for immutability, hashability, and efficiency.
 """
 
-from .symbol import (
-    Symbol,
-    symbol,
-    is_symbol,
-    gensym,
-    clear_symbol_cache,
-)
-
-from .expression import (
-    Expression,
-    is_expr,
-    head_of,
-    tail_of,
-    attrs_of,
-    has_attr,
-    map_args,
-    replace_head,
-    replace_tail,
-    replace_attrs,
-)
-
 from .atoms import (
     Atom,
     Element,
+    atom_head,
     is_atom,
     is_integer,
+    is_numeric,
     is_real,
     is_string,
-    is_numeric,
-    atom_head,
 )
-
 from .attributes import (
-    # Protection
-    Protected,
-    ReadProtected,
-    Locked,
+    ALL_ATTRIBUTES,
+    # Attribute sets
+    HOLD_ATTRIBUTES,
+    PROTECTION_ATTRIBUTES,
+    STRUCTURAL_ATTRIBUTES,
     Constant,
-    Temporary,
+    # Structural
+    Flat,
     # Hold attributes
     Hold,
     HoldAll,
+    HoldAllComplete,
     HoldFirst,
     HoldRest,
-    HoldAllComplete,
-    SequenceHold,
-    # Structural
-    Flat,
-    Orderless,
-    OneIdentity,
     Listable,
+    Locked,
     # Function types
     NumericFunction,
-    # Attribute sets
-    HOLD_ATTRIBUTES,
-    STRUCTURAL_ATTRIBUTES,
-    PROTECTION_ATTRIBUTES,
-    ALL_ATTRIBUTES,
+    OneIdentity,
+    Orderless,
+    # Protection
+    Protected,
+    ReadProtected,
+    SequenceHold,
+    Temporary,
 )
-
+from .expression import (
+    Expression,
+    attrs_of,
+    has_attr,
+    head_of,
+    is_expr,
+    tail_of,
+)
+from .symbol import (
+    Symbol,
+    clear_symbol_cache,
+    gensym,
+    is_symbol,
+    symbol,
+)
 
 __all__ = [
     # Symbol
@@ -84,10 +76,6 @@ __all__ = [
     "tail_of",
     "attrs_of",
     "has_attr",
-    "map_args",
-    "replace_head",
-    "replace_tail",
-    "replace_attrs",
     # Atoms
     "Atom",
     "Element",

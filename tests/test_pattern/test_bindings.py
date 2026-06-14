@@ -1,12 +1,17 @@
 """Tests for Bindings module."""
+
 from __future__ import annotations
 
 import pytest
+
 from src.core.symbol import Symbol
 from src.pattern.bindings import (
-    Bindings, BindingConflict,
-    empty_bindings, single_binding, merge_bindings,
-    bindings_compatible, bindings_from_pairs,
+    BindingConflict,
+    Bindings,
+    bindings_compatible,
+    bindings_from_pairs,
+    empty_bindings,
+    single_binding,
 )
 
 x = Symbol("x")
@@ -179,7 +184,7 @@ class TestBindingsMisc:
         assert not isinstance(d, Bindings)
 
     def test_repr_empty(self):
-        assert "Bindings({})" == repr(empty_bindings())
+        assert repr(empty_bindings()) == "Bindings({})"
 
     def test_repr_nonempty(self):
         b = Bindings({x: 42})
@@ -188,7 +193,7 @@ class TestBindingsMisc:
         assert "42" in r
 
     def test_str_empty(self):
-        assert "{}" == str(empty_bindings())
+        assert str(empty_bindings()) == "{}"
 
     def test_str_nonempty(self):
         b = Bindings({x: 42})

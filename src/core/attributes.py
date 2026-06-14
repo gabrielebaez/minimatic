@@ -23,7 +23,6 @@ Usage:
 
 from .symbol import Symbol
 
-
 # PROTECTION ATTRIBUTES
 
 Protected = Symbol("Protected")
@@ -153,43 +152,47 @@ the package that defines it.
 
 # ATTRIBUTE SETS (for convenience)
 
-STRUCTURAL_ATTRIBUTES = frozenset({
-    Flat,
-    Orderless,
-    OneIdentity,
-    Listable,
-})
+STRUCTURAL_ATTRIBUTES = frozenset(
+    {
+        Flat,
+        Orderless,
+        OneIdentity,
+        Listable,
+    }
+)
 """All attributes that affect expression structure."""
 
-PROTECTION_ATTRIBUTES = frozenset({
-    Protected,
-    ReadProtected,
-    Locked,
-    Constant,
-    Temporary,
-})
+PROTECTION_ATTRIBUTES = frozenset(
+    {
+        Protected,
+        ReadProtected,
+        Locked,
+        Constant,
+        Temporary,
+    }
+)
 """All attributes related to symbol protection."""
 
-HOLD_ATTRIBUTES = frozenset({
-    Hold,
-    HoldAll,
-    HoldFirst,
-    HoldRest,
-    HoldAllComplete,
-    SequenceHold,
-})
+HOLD_ATTRIBUTES = frozenset(
+    {
+        Hold,
+        HoldAll,
+        HoldFirst,
+        HoldRest,
+        HoldAllComplete,
+        SequenceHold,
+    }
+)
 """All attributes related to evaluation control."""
 
 ALL_ATTRIBUTES = (
-    STRUCTURAL_ATTRIBUTES 
-    | PROTECTION_ATTRIBUTES 
-    | HOLD_ATTRIBUTES
-    | {NumericFunction, Stub}
+    STRUCTURAL_ATTRIBUTES | PROTECTION_ATTRIBUTES | HOLD_ATTRIBUTES | {NumericFunction, Stub}
 )
 """All defined attributes."""
 
 
 # UTILITY FUNCTIONS
+
 
 def is_attribute(sym: Symbol) -> bool:
     """
@@ -222,6 +225,7 @@ def is_orderless(attrs: frozenset[Symbol]) -> bool:
 def is_listable(attrs: frozenset[Symbol]) -> bool:
     """Check if Listable attribute is set."""
     return Listable in attrs
+
 
 def has_attribute(attrs: frozenset[Symbol], attr: Symbol) -> bool:
     """Check if a specific attribute is present."""

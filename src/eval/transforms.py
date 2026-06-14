@@ -5,10 +5,9 @@ Implements Sequence flattening, Flat attribute application,
 Orderless sorting, and Listable threading.
 """
 
-from typing import Any, Iterable, List, Tuple
+from typing import Any
 
-from src.core import Expression, Symbol, is_expr, head_of
-from src.core.attributes import has_attribute, Flat, Orderless, Listable, SequenceHold
+from src.core import Expression, Symbol, head_of, is_expr
 
 
 def flatten_sequences(expr: Expression, hold_sequence: bool = False) -> Expression:
@@ -114,7 +113,7 @@ def apply_orderless(expr: Expression, is_orderless: bool = True) -> Expression:
     return expr
 
 
-def canonical_sort(elements: Tuple[Any, ...]) -> Tuple[Any, ...]:
+def canonical_sort(elements: tuple[Any, ...]) -> tuple[Any, ...]:
     """
     Sort elements into canonical order for Orderless matching.
 
@@ -123,6 +122,7 @@ def canonical_sort(elements: Tuple[Any, ...]) -> Tuple[Any, ...]:
     2. Complexity (depth, leaf count)
     3. Alphabetically by string representation
     """
+
     def sort_key(elem):
         # Priority 1: Type
         if isinstance(elem, (int, float, complex)):

@@ -16,21 +16,19 @@ Examples:
     Hold[x + 1]   →  Expression(Hold, Expression(Plus, x, 1), _attrs={Hold})
 """
 
+from collections.abc import Callable, Iterator
 from typing import (
-    Any, 
-    Callable, 
-    Iterator, 
-    Union, 
     TYPE_CHECKING,
-    overload,
+    Any,
 )
 
 if TYPE_CHECKING:
+    from .atoms import Element
     from .symbol import Symbol
-    from .atoms import Atom, Element
 
 
 # EXPRESSION CLASS
+
 
 class Expression(tuple):
     """
@@ -46,9 +44,9 @@ class Expression(tuple):
 
     def __new__(
         cls,
-        head: Union[Symbol, Expression],
+        head: Symbol | Expression,
         *args: Element,
-        _attrs: Union[frozenset[Symbol], set[Symbol], None] = None,
+        _attrs: frozenset[Symbol] | set[Symbol] | None = None,
     ) -> Expression:
         """
         Construct an expression.
@@ -73,6 +71,7 @@ class Expression(tuple):
         """
         # Validate head
         from .symbol import Symbol  # Local import to avoid circularity
+
         if not isinstance(head, (Symbol, Expression)):
             raise TypeError(
                 f"Expression head must be Symbol or Expression, got {type(head).__name__}"
@@ -89,16 +88,14 @@ class Expression(tuple):
         # Validate attributes are all Symbols
         for attr in attributes:
             if not isinstance(attr, Symbol):
-                raise TypeError(
-                    f"Expression attributes must be Symbols, got {type(attr).__name__}"
-                )
+                raise TypeError(f"Expression attributes must be Symbols, got {type(attr).__name__}")
 
         # Create the tuple: (head, tail, attributes)
         tail = tuple(args)
         return super().__new__(cls, (head, tail, attributes))
 
     @property
-    def head(self) -> Union[Symbol, Expression]:
+    def head(self) -> Symbol | Expression:
         """The function/operator of this expression."""
         return tuple.__getitem__(self, 0)
 
@@ -149,7 +146,7 @@ class Expression(tuple):
         """Check if expression has all of the specified attributes."""
         return frozenset(attrs) <= self.attributes
 
-    def with_head(self, new_head: Union[Symbol, Expression]) -> Expression:
+    def with_head(self, new_head: Symbol | Expression) -> Expression:
         """Return new expression with different head."""
         return Expression(new_head, *self.tail, _attrs=self.attributes)
 
@@ -181,10 +178,7 @@ class Expression(tuple):
         """
         return Expression(self.head, *(fn(arg) for arg in self.tail), _attrs=self.attributes)
 
-    def map_args_indexed(
-        self, 
-        fn: Callable[[int, Element], Element]
-    ) -> Expression:
+    def map_args_indexed(self, fn: Callable[[int, Element], Element]) -> Expression:
         """
         Apply function to each (index, argument) pair.
 
@@ -195,9 +189,7 @@ class Expression(tuple):
             New Expression with transformed arguments.
         """
         return Expression(
-            self.head, 
-            *(fn(i, arg) for i, arg in enumerate(self.tail)), 
-            _attrs=self.attributes
+            self.head, *(fn(i, arg) for i, arg in enumerate(self.tail)), _attrs=self.attributes
         )
 
     def append(self, *new_args: Element) -> Expression:
@@ -240,9 +232,7 @@ class Expression(tuple):
         base = f"{head_str}[{args_str}]"
 
         if self.attributes:
-            attrs_str = ", ".join(
-                str(a) for a in sorted(self.attributes, key=lambda s: str(s))
-            )
+            attrs_str = ", ".join(str(a) for a in sorted(self.attributes, key=lambda s: str(s)))
             return f"{base} {{attrs: {attrs_str}}}"
         return base
 
@@ -254,6 +244,7 @@ class Expression(tuple):
 
 
 # MODULE-LEVEL FUNCTIONS
+
 
 def _format_element(elem: Any) -> str:
     """Format an element for display in expression representation."""
@@ -267,7 +258,7 @@ def is_expr(obj: object) -> bool:
     return isinstance(obj, Expression)
 
 
-def head_of(elem: Element) -> Union[Symbol, Expression, type]:
+def head_of(elem: Element) -> Symbol | Expression | type:
     """
     Get the head of any element.
 
@@ -284,8 +275,8 @@ def head_of(elem: Element) -> Union[Symbol, Expression, type]:
     Returns:
         The head of the element.
     """
-    from .symbol import Symbol
     from .atoms import atom_head
+    from .symbol import Symbol
 
     if isinstance(elem, Expression):
         return elem.head
@@ -342,32 +333,3 @@ def has_attr(elem: Element, attr: Symbol) -> bool:
         True if the element has the attribute.
     """
     return attr in attrs_of(elem)
-
-
-def map_args(Expression: Expression, fn: Callable[[Element], Element]) -> Expression:
-    """
-    Functional interface to map over expression arguments.
-
-    Args:
-        Expression: The expression.
-        fn: Function to apply to each argument.
-
-    Returns:
-        New Expression with transformed arguments.
-    """
-    return Expression.map_args(fn)
-
-
-def replace_head(Expression: Expression, new_head: Union[Symbol, Expression]) -> Expression:
-    """Functional interface to replace expression head."""
-    return Expression.with_head(new_head)
-
-
-def replace_tail(Expression: Expression, *new_args: Element) -> Expression:
-    """Functional interface to replace expression arguments."""
-    return Expression.with_tail(*new_args)
-
-
-def replace_attrs(Expression: Expression, *new_attrs: Symbol) -> Expression:
-    """Functional interface to replace expression attributes."""
-    return Expression.with_only_attrs(*new_attrs)

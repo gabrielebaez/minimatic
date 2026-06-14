@@ -1,13 +1,19 @@
 """Tests for Expression module."""
+
 from __future__ import annotations
 
 import pytest
-from src.core.symbol import Symbol
-from src.core.expression import (
-    Expression, is_expr, head_of, tail_of, attrs_of, has_attr,
-)
-from src.core.attributes import Flat, Orderless, HoldAll
 
+from src.core.attributes import Flat, HoldAll, Orderless
+from src.core.expression import (
+    Expression,
+    attrs_of,
+    has_attr,
+    head_of,
+    is_expr,
+    tail_of,
+)
+from src.core.symbol import Symbol
 
 Plus = Symbol("Plus")
 x = Symbol("x")

@@ -1,19 +1,32 @@
 """Tests for Blanks module."""
+
 from __future__ import annotations
 
 import pytest
-from src.core.symbol import Symbol
-from src.core.expression import Expression
-from src.pattern.blanks import (
-    Blank, BlankSequence, BlankNullSequence,
-    blank, blank_seq, blank_null_seq,
-    is_blank, is_blank_sequence, is_blank_null_sequence,
-    is_any_blank, is_sequence_blank,
-    blank_head_constraint, blank_matches_head,
-    blank_min_length, blank_max_length, blank_can_match_empty,
-    get_blank, get_blank_seq, get_blank_null_seq,
-)
 
+from src.core.expression import Expression
+from src.core.symbol import Symbol
+from src.pattern.blanks import (
+    Blank,
+    BlankNullSequence,
+    BlankSequence,
+    blank,
+    blank_can_match_empty,
+    blank_head_constraint,
+    blank_matches_head,
+    blank_max_length,
+    blank_min_length,
+    blank_null_seq,
+    blank_seq,
+    get_blank,
+    get_blank_null_seq,
+    get_blank_seq,
+    is_any_blank,
+    is_blank,
+    is_blank_null_sequence,
+    is_blank_sequence,
+    is_sequence_blank,
+)
 
 Integer = Symbol("Integer")
 List = Symbol("List")
@@ -118,8 +131,8 @@ class TestBlankUtilities:
 
     def test_max_length(self):
         assert blank_max_length(blank()) == 1
-        assert blank_max_length(blank_seq()) == float('inf')
-        assert blank_max_length(blank_null_seq()) == float('inf')
+        assert blank_max_length(blank_seq()) == float("inf")
+        assert blank_max_length(blank_null_seq()) == float("inf")
 
     def test_can_match_empty(self):
         assert not blank_can_match_empty(blank())

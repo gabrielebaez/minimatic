@@ -1,18 +1,15 @@
 """Tests for Symbol module."""
+
 from __future__ import annotations
 
 import pytest
+
 from src.core.symbol import (
-    Symbol, symbol, is_symbol, gensym, clear_symbol_cache,
+    Symbol,
+    gensym,
+    is_symbol,
+    symbol,
 )
-
-
-@pytest.fixture(autouse=True)
-def _clean_cache():
-    """Clear symbol cache before each test."""
-    clear_symbol_cache()
-    yield
-    clear_symbol_cache()
 
 
 class TestSymbolCreation:

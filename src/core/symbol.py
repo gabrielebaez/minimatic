@@ -16,9 +16,8 @@ Structure:
     lightweight and allows attributes to change during evaluation.
 """
 
-from typing import Dict
-from threading import Lock
 import itertools
+from threading import Lock
 
 
 class Symbol(tuple):
@@ -141,7 +140,7 @@ class Symbol(tuple):
 
 
 # SYMBOL INTERNING CACHE
-_symbol_cache: Dict[str, Symbol] = {}
+_symbol_cache: dict[str, Symbol] = {}
 _cache_lock = Lock()
 _gensym_counter = itertools.count(1)
 
@@ -153,7 +152,9 @@ def clear_symbol_cache() -> None:
         _symbol_cache.clear()
         _gensym_counter = itertools.count(1)
 
+
 # FACTORY FUNCTIONS
+
 
 def symbol(name: str) -> Symbol:
     """
@@ -198,7 +199,9 @@ def gensym(prefix: str = "G") -> Symbol:
     n = next(_gensym_counter)
     return Symbol(f"{prefix}{n}")
 
+
 # TYPE PREDICATES
+
 
 def is_symbol(obj: object) -> bool:
     """
@@ -217,11 +220,28 @@ def is_symbol(obj: object) -> bool:
 
 # Pre-intern commonly used system symbols
 _SYSTEM_SYMBOLS = [
-    "Symbol", "Integer", "Real", "Rational", "Complex", "String",
-    "List", "Rule", "RuleDelayed", "Set", "SetDelayed",
-    "Pattern", "Blank", "BlankSequence", "BlankNullSequence",
-    "Condition", "Alternatives", "Sequence",
-    "True", "False", "Null", "Nothing",
+    "Symbol",
+    "Integer",
+    "Real",
+    "Rational",
+    "Complex",
+    "String",
+    "List",
+    "Rule",
+    "RuleDelayed",
+    "Set",
+    "SetDelayed",
+    "Pattern",
+    "Blank",
+    "BlankSequence",
+    "BlankNullSequence",
+    "Condition",
+    "Alternatives",
+    "Sequence",
+    "True",
+    "False",
+    "Null",
+    "Nothing",
 ]
 
 for _name in _SYSTEM_SYMBOLS:

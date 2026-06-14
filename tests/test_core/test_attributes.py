@@ -1,15 +1,32 @@
 """Tests for Attributes module."""
+
 from __future__ import annotations
 
-from src.core.symbol import Symbol
 from src.core.attributes import (
-    Protected, ReadProtected, Locked, Constant, Temporary,
-    Hold, HoldAll, HoldFirst, HoldRest, HoldAllComplete, SequenceHold,
-    Flat, Orderless, OneIdentity, Listable,
-    NumericFunction, Stub,
-    STRUCTURAL_ATTRIBUTES, PROTECTION_ATTRIBUTES, HOLD_ATTRIBUTES, ALL_ATTRIBUTES,
-    is_attribute, holds_all, is_flat, is_orderless, is_listable, has_attribute,
+    ALL_ATTRIBUTES,
+    HOLD_ATTRIBUTES,
+    PROTECTION_ATTRIBUTES,
+    STRUCTURAL_ATTRIBUTES,
+    Flat,
+    Hold,
+    HoldAll,
+    HoldAllComplete,
+    HoldFirst,
+    HoldRest,
+    Listable,
+    Locked,
+    OneIdentity,
+    Orderless,
+    Protected,
+    SequenceHold,
+    has_attribute,
+    holds_all,
+    is_attribute,
+    is_flat,
+    is_listable,
+    is_orderless,
 )
+from src.core.symbol import Symbol
 
 
 class TestAttributeSymbols:

@@ -1,17 +1,18 @@
 """Tests for Builtin Registry module."""
-from __future__ import annotations
 
-from src.core.symbol import Symbol
-from src.core.expression import Expression
-from src.core.attributes import Flat, Orderless, Listable, NumericFunction
-from src.builtins.registry import (
-    register_builtin, get_builtin, has_builtin,
-    builtin_attributes, clear_registry, BuiltinRegistry,
-)
-from src.eval.context import EvaluationContext
+from __future__ import annotations
 
 # Force registration of builtins by importing arithmetic
 import src.builtins.arithmetic  # noqa: F401
+from src.builtins.registry import (
+    BuiltinRegistry,
+    builtin_attributes,
+    clear_registry,
+    get_builtin,
+    has_builtin,
+)
+from src.core.attributes import Flat, Listable, NumericFunction, Orderless
+from src.core.symbol import Symbol
 
 
 class TestRegistry:
@@ -115,6 +116,7 @@ class TestClearRegistry:
     def test_clear_and_restore(self):
         # Save current state
         from src.builtins.registry import _registry
+
         saved = dict(_registry)
         try:
             clear_registry()

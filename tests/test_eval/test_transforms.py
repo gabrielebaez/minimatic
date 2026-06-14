@@ -1,13 +1,19 @@
 """Tests for Transforms module."""
+
 from __future__ import annotations
 
-from src.core.symbol import Symbol
+from src.core.attributes import Flat, Listable, Orderless
 from src.core.expression import Expression
+from src.core.symbol import Symbol
 from src.eval.transforms import (
-    flatten_sequences, apply_flat, apply_orderless,
-    apply_listable, canonical_sort, _get_depth, _leaf_count,
+    _get_depth,
+    _leaf_count,
+    apply_flat,
+    apply_listable,
+    apply_orderless,
+    canonical_sort,
+    flatten_sequences,
 )
-from src.core.attributes import Flat, Orderless, Listable
 
 Plus = Symbol("Plus")
 Times = Symbol("Times")

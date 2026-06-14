@@ -3,25 +3,28 @@ Main evaluation loop implementing the Wolfram Language
 standard evaluation procedure.
 """
 
-from typing import Any, Optional, Callable
+from collections.abc import Callable
+from typing import Any
 
 from src.core import (
-    Symbol, Expression,
-    is_symbol, is_expr, is_atom,
-    Flat, Orderless, Listable,
-    HoldAll, HoldFirst, HoldRest, HoldAllComplete,
+    Expression,
+    Flat,
+    HoldAll,
+    HoldAllComplete,
+    HoldFirst,
+    HoldRest,
+    Listable,
+    Orderless,
     SequenceHold,
+    Symbol,
+    is_atom,
+    is_expr,
+    is_symbol,
 )
-from src.core.attributes import has_attribute
-from src.pattern import match, replace_with_bindings, NO_MATCH, Bindings
+from src.pattern import match, replace_with_bindings
 
-from .context import get_current_context, EvaluationContext
-from .values import get_value, OwnValues, DownValues, UpValues, SubValues, NValues
-from .rules import Rule, try_rules, apply_rule
-from .transforms import (
-    flatten_sequences, apply_flat,
-    apply_orderless, apply_listable
-)
+from .context import EvaluationContext, get_current_context
+from .transforms import apply_flat, apply_listable, apply_orderless, flatten_sequences
 
 # Lazy import to avoid circular dependency
 _builtin_dispatch = None
@@ -32,6 +35,7 @@ def _get_builtin_dispatch():
     global _builtin_dispatch
     if _builtin_dispatch is None:
         from src.builtins.registry import dispatch_builtin
+
         _builtin_dispatch = dispatch_builtin
     return _builtin_dispatch
 
@@ -43,11 +47,13 @@ DEFAULT_ITERATION_LIMIT = 1000
 
 class RecursionLimitError(Exception):
     """Raised when $RecursionLimit is exceeded."""
+
     pass
 
 
 class IterationLimitError(Exception):
     """Raised when $IterationLimit is exceeded."""
+
     pass
 
 
@@ -64,7 +70,7 @@ class EvalState:
 _eval_state = EvalState()
 
 
-def evaluate(expr: Any, context: Optional[EvaluationContext] = None) -> Any:
+def evaluate(expr: Any, context: EvaluationContext | None = None) -> Any:
     """
     Main evaluation loop following the Wolfram Language standard evaluation procedure.
 
@@ -91,9 +97,7 @@ def evaluate(expr: Any, context: Optional[EvaluationContext] = None) -> Any:
     _eval_state.recursion_depth += 1
     if _eval_state.recursion_depth > _eval_state.recursion_limit:
         _eval_state.recursion_depth -= 1
-        raise RecursionLimitError(
-            f"Recursion depth of {_eval_state.recursion_limit} exceeded"
-        )
+        raise RecursionLimitError(f"Recursion depth of {_eval_state.recursion_limit} exceeded")
 
     try:
         # Step 1: Dispatch by expression type
@@ -125,9 +129,7 @@ def _evaluate_symbol(sym: Symbol, context: EvaluationContext) -> Any:
 
     # Try each OwnValue rule
     for pattern_expr, replacement, condition in own_values:
-        result, success = _try_definition(
-            pattern_expr, replacement, condition, sym, context
-        )
+        result, success = _try_definition(pattern_expr, replacement, condition, sym, context)
         if success:
             return evaluate(result, context)  # Re-evaluate result
 
@@ -136,7 +138,6 @@ def _evaluate_symbol(sym: Symbol, context: EvaluationContext) -> Any:
 
 def _evaluate_expression(expr: Expression, context: EvaluationContext) -> Any:
     """Evaluate a compound expression."""
-    original_expr = expr
 
     # Step 3a: Evaluate head (unless HoldAllComplete)
     head = expr.head
@@ -155,9 +156,7 @@ def _evaluate_expression(expr: Expression, context: EvaluationContext) -> Any:
 
         # If head changed, create new expression
         if head != expr.head:
-            expr = Expression(
-                head, *expr.args, _attrs=expr.attributes
-            )
+            expr = Expression(head, *expr.args, _attrs=expr.attributes)
 
     # Step 3b: Resolve attributes (already done above)
     # effective_attrs computed from head + expression attributes
@@ -169,9 +168,7 @@ def _evaluate_expression(expr: Expression, context: EvaluationContext) -> Any:
     args_changed = tuple(evaluated_args) != expr.args
 
     if args_changed:
-        expr = Expression(
-            expr.head, *evaluated_args, _attrs=expr.attributes
-        )
+        expr = Expression(expr.head, *evaluated_args, _attrs=expr.attributes)
 
     # Step 3d: Flatten Sequences (unless SequenceHold or HoldAllComplete)
     has_sequence_hold = SequenceHold in effective_attrs
@@ -205,9 +202,7 @@ def _evaluate_expression(expr: Expression, context: EvaluationContext) -> Any:
     if new_expr != expr:
         _eval_state.iteration_count += 1
         if _eval_state.iteration_count > _eval_state.iteration_limit:
-            raise IterationLimitError(
-                f"Iteration limit of {_eval_state.iteration_limit} exceeded"
-            )
+            raise IterationLimitError(f"Iteration limit of {_eval_state.iteration_limit} exceeded")
 
         # Re-evaluate from top (Step 1)
         return evaluate(new_expr, context)
@@ -216,9 +211,7 @@ def _evaluate_expression(expr: Expression, context: EvaluationContext) -> Any:
     return expr
 
 
-def _resolve_attributes(
-    expr: Expression, context: EvaluationContext
-) -> frozenset[Symbol]:
+def _resolve_attributes(expr: Expression, context: EvaluationContext) -> frozenset[Symbol]:
     """
     Step 3b: Resolve effective attributes.
 
@@ -233,6 +226,7 @@ def _resolve_attributes(
 
     # Also check built-in registered attributes
     from src.builtins.registry import builtin_attributes
+
     builtin_attrs = builtin_attributes(expr.head) if is_symbol(expr.head) else frozenset()
 
     # Combine: head_ctx_attrs ∪ builtin_attrs ∪ expr_attrs
@@ -265,9 +259,7 @@ def _evaluate_arguments(
     elif has_hold_first:
         # Hold first, evaluate rest
         evaluated_args = [expr.args[0]] if expr.args else []
-        evaluated_args.extend(
-            evaluate(arg, context) for arg in expr.args[1:]
-        )
+        evaluated_args.extend(evaluate(arg, context) for arg in expr.args[1:])
         return evaluated_args
     elif has_hold_rest:
         # Evaluate first, hold rest
@@ -289,9 +281,7 @@ def _evaluate_symbol_head(head: Symbol, context: EvaluationContext) -> Any:
         return head
 
     for pattern_expr, replacement, condition in own_values:
-        result, success = _try_definition(
-            pattern_expr, replacement, condition, head, context
-        )
+        result, success = _try_definition(pattern_expr, replacement, condition, head, context)
         if success:
             return evaluate(result, context)
 
@@ -351,14 +341,10 @@ def _apply_rules(expr: Expression, context: EvaluationContext) -> Any:
     return result
 
 
-def _try_value_rules(
-    rules_list: list, expr: Expression, context: EvaluationContext
-) -> Any:
+def _try_value_rules(rules_list: list, expr: Expression, context: EvaluationContext) -> Any:
     """Try a list of value entries (pattern, replacement, condition) against expr."""
     for pattern_expr, replacement, condition in rules_list:
-        result, success = _try_definition(
-            pattern_expr, replacement, condition, expr, context
-        )
+        result, success = _try_definition(pattern_expr, replacement, condition, expr, context)
         if success:
             return result
     return expr
@@ -367,7 +353,7 @@ def _try_value_rules(
 def _try_definition(
     pattern_expr: Any,
     replacement: Any,
-    condition: Optional[Any],
+    condition: Any | None,
     expr: Any,
     context: EvaluationContext,
 ) -> tuple[Any, bool]:
@@ -380,9 +366,7 @@ def _try_definition(
 
     # Check condition if present
     if condition is not None:
-        cond_substituted = replace_with_bindings(
-            condition, match_result.bindings
-        )
+        cond_substituted = replace_with_bindings(condition, match_result.bindings)
         cond_result = evaluate(cond_substituted, context)
 
         # Must be True to proceed
@@ -403,7 +387,7 @@ def _try_builtin(expr: Expression, context: EvaluationContext) -> Any:
 
 def try_evaluate(
     expr: Any,
-    context: Optional[EvaluationContext] = None,
+    context: EvaluationContext | None = None,
     default: Any = None,
 ) -> Any:
     """
@@ -411,7 +395,7 @@ def try_evaluate(
     """
     try:
         return evaluate(expr, context)
-    except (RecursionLimitError, IterationLimitError, Exception):
+    except RecursionLimitError, IterationLimitError, Exception:
         return default
 
 
@@ -419,7 +403,7 @@ def FixedPoint(
     func: Callable[[Any], Any],
     expr: Any,
     max_iterations: int = 100,
-    same_test: Optional[Callable] = None,
+    same_test: Callable | None = None,
 ) -> Any:
     """
     Apply func repeatedly until the result no longer changes.
@@ -434,7 +418,9 @@ def FixedPoint(
         Fixed point of func starting from expr
     """
     if same_test is None:
-        same_test = lambda a, b: a == b
+
+        def same_test(a: Any, b: Any) -> bool:
+            return a == b
 
     for _ in range(max_iterations):
         new_expr = func(expr)
@@ -445,9 +431,7 @@ def FixedPoint(
     return expr
 
 
-def evaluate_iterated(
-    expr: Any, n: int, context: Optional[EvaluationContext] = None
-) -> Any:
+def evaluate_iterated(expr: Any, n: int, context: EvaluationContext | None = None) -> Any:
     """
     Evaluate expression n times.
     """

@@ -1,11 +1,14 @@
 """Tests for Context module."""
+
 from __future__ import annotations
 
 from src.core.symbol import Symbol
 from src.eval.context import (
-    EvaluationContext, GlobalContext,
-    get_current_context, context_stack, with_context,
     ContextChain,
+    EvaluationContext,
+    GlobalContext,
+    get_current_context,
+    with_context,
 )
 
 
@@ -150,5 +153,6 @@ class TestContextChain:
         c2 = EvaluationContext("C2")
         chain = ContextChain(c1, c2)
         from pytest import raises
+
         with raises(KeyError):
             chain[Symbol("missing")]

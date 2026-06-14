@@ -21,26 +21,23 @@ Note:
     allows natural interoperability with Python.
 """
 
-from typing import Union
-
-from .symbol import Symbol
 from .expression import Expression
-
+from .symbol import Symbol
 
 # TYPE ALIASES
 
 # Atomic types (self-evaluating)
-Atom = Union[int, float, complex, str, bool, None]
+Atom = int | float | complex | str | bool | None
 
 # Numeric atoms
-NumericAtom = Union[int, float, complex]
+NumericAtom = int | float | complex
 
 # All element types
-Element = Union[Atom, Symbol, Expression]
-
+Element = Atom | Symbol | Expression
 
 
 # TYPE PREDICATES
+
 
 def is_atom(obj: object) -> bool:
     return isinstance(obj, (int, float, complex, str, bool, type(None)))
@@ -91,7 +88,7 @@ def is_inexact(obj: object) -> bool:
 
 
 # HEAD SYMBOLS
-def atom_head(obj: Atom) -> "Symbol":
+def atom_head(obj: Atom) -> Symbol:
     """
     Get the head symbol for an atom.
 

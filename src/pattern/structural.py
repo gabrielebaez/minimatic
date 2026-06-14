@@ -24,20 +24,19 @@ Examples:
 """
 
 # from __future__ import annotations
-from typing import Optional, Union, Any, Callable, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from core.atoms import Element
 
-from src.core.symbol import Symbol
 from src.core.expression import Expression, is_expr
+from src.core.symbol import Symbol
 
 from .blanks import (
     Blank,
-    BlankSequence,
     BlankNullSequence,
+    BlankSequence,
     blank,
-    is_any_blank,
 )
 
 # PATTERN HEAD SYMBOLS
@@ -55,7 +54,6 @@ PatternTest = Symbol("PatternTest")
 """Head for test patterns: PatternTest[pattern, testFunc]."""
 
 Optional = Symbol("Optional")
-"""Head for optional patterns: Optional[pattern, default]."""
 
 Repeated = Symbol("Repeated")
 """Head for one-or-more repetition: Repeated[pattern]."""
@@ -74,6 +72,7 @@ HoldPattern = Symbol("HoldPattern")
 
 # PATTERN CONSTRUCTORS
 
+
 def pattern(name: Symbol, pat: Optional[Expression] = None) -> Expression:
     """
     Create a named pattern.
@@ -90,7 +89,7 @@ def pattern(name: Symbol, pat: Optional[Expression] = None) -> Expression:
 
     Examples:
         >>> x = Symbol("x")
-        >>> pattern(x)                    # x_ 
+        >>> pattern(x)                    # x_
         Pattern[x, Blank[]]
         >>> pattern(x, blank(Symbol("Integer")))  # x_Integer
         Pattern[x, Blank[Integer]]
@@ -190,7 +189,7 @@ def pattern_test(pat: Expression, test: Symbol) -> Expression:
     return Expression(PatternTest, pat, test)
 
 
-def optional(pat: Expression, default: "Element" = None) -> Expression:
+def optional(pat: Expression, default: Element = None) -> Expression:
     """
     Create an optional pattern with a default value.
 
@@ -264,10 +263,7 @@ def repeated_null(pat: Expression, spec: Optional[Expression] = None) -> Express
     return Expression(RepeatedNull, pat, spec)
 
 
-def except_pattern(
-    excluded: Expression,
-    alternative: Optional[Expression] = None
-) -> Expression:
+def except_pattern(excluded: Expression, alternative: Optional[Expression] = None) -> Expression:
     """
     Create an exception pattern.
 
@@ -347,7 +343,9 @@ def hold_pattern(pat: Expression) -> Expression:
     """
     return Expression(HoldPattern, pat)
 
+
 # TYPE PREDICATES
+
 
 def is_pattern(obj: object) -> bool:
     """Check if object is a Pattern expression."""
@@ -410,13 +408,24 @@ def is_pattern_construct(obj: object) -> bool:
     if not is_expr(obj):
         return False
     return obj.head in (
-        Pattern, Condition, Alternatives, PatternTest,
-        Optional, Repeated, RepeatedNull, Except, Verbatim, HoldPattern,
-        Blank, BlankSequence, BlankNullSequence,
+        Pattern,
+        Condition,
+        Alternatives,
+        PatternTest,
+        Optional,
+        Repeated,
+        RepeatedNull,
+        Except,
+        Verbatim,
+        HoldPattern,
+        Blank,
+        BlankSequence,
+        BlankNullSequence,
     )
 
 
 # PATTERN UTILITIES
+
 
 def pattern_name(pat: Expression) -> Optional[Symbol]:
     """
@@ -460,7 +469,7 @@ def pattern_blank(pat: Expression) -> Optional[Expression]:
     return None
 
 
-def get_default_value(opt: Expression) -> Optional["Element"]:
+def get_default_value(opt: Expression) -> Optional[Element]:
     """
     Extract the default value from an Optional expression.
 
@@ -520,7 +529,7 @@ def unwrap_hold_pattern(pat: Expression) -> Expression:
     return pat
 
 
-def collect_pattern_names(pat: "Element") -> set[Symbol]:
+def collect_pattern_names(pat: Element) -> set[Symbol]:
     """
     Collect all named pattern variables in a pattern.
 
@@ -542,7 +551,7 @@ def collect_pattern_names(pat: "Element") -> set[Symbol]:
     """
     names: set[Symbol] = set()
 
-    def collect(p: "Element") -> None:
+    def collect(p: Element) -> None:
         if is_pattern(p):
             name = pattern_name(p)
             if name is not None:

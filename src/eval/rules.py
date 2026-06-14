@@ -7,20 +7,19 @@ application order and condition checking.
 
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, Optional, Callable, Union
+from typing import Any
 
-from src.core import Expression, Symbol, is_expr
 from src.pattern import (
-    match, replace_with_bindings, Bindings,
-    MatchResult, NO_MATCH,
-    pattern_name, is_pattern
+    match,
+    replace_with_bindings,
 )
 
 
 class RuleType(Enum):
     """Types of rules."""
-    IMMEDIATE = auto()   # -> (Rule)
-    DELAYED = auto()     # :> (RuleDelayed)
+
+    IMMEDIATE = auto()  # -> (Rule)
+    DELAYED = auto()  # :> (RuleDelayed)
 
 
 @dataclass(frozen=True)
@@ -39,7 +38,7 @@ class Rule:
     lhs: Any
     rhs: Any
     rule_type: RuleType = RuleType.IMMEDIATE
-    condition: Optional[Any] = None
+    condition: Any | None = None
     priority: int = 0
 
     def is_immediate(self) -> bool:
@@ -57,17 +56,19 @@ class Rule:
 
 # Convenience constructors
 
-def RuleImmediate(lhs: Any, rhs: Any, condition: Optional[Any] = None, priority: int = 0) -> Rule:
+
+def RuleImmediate(lhs: Any, rhs: Any, condition: Any | None = None, priority: int = 0) -> Rule:
     """Create an immediate rule: lhs -> rhs."""
     return Rule(lhs, rhs, RuleType.IMMEDIATE, condition, priority)
 
 
-def RuleDelayed(lhs: Any, rhs: Any, condition: Optional[Any] = None, priority: int = 0) -> Rule:
+def RuleDelayed(lhs: Any, rhs: Any, condition: Any | None = None, priority: int = 0) -> Rule:
     """Create a delayed rule: lhs :> rhs."""
     return Rule(lhs, rhs, RuleType.DELAYED, condition, priority)
 
 
 # Type checking
+
 
 def is_rule(obj: Any) -> bool:
     """Check if object is a Rule."""
@@ -102,6 +103,7 @@ def apply_rule(rule: Rule, expr: Any, context: Any = None) -> tuple[Any, bool]:
     if rule.condition is not None:
         # Evaluate condition with bindings substituted
         from .evaluator import evaluate  # Avoid circular import
+
         cond_expr = replace_with_bindings(rule.condition, match_result.bindings)
         cond_result = evaluate(cond_expr, context)
 
@@ -117,6 +119,7 @@ def apply_rule(rule: Rule, expr: Any, context: Any = None) -> tuple[Any, bool]:
         else:
             replaced = replace_with_bindings(rule.rhs, match_result.bindings)
             from .evaluator import evaluate  # Avoid circular import
+
             result = evaluate(replaced, context)
     else:
         # Delayed: substitute but don't evaluate yet
@@ -148,8 +151,9 @@ def try_rules(rules: list[Rule], expr: Any, context: Any = None) -> Any:
     return expr
 
 
-def apply_rules_repeatedly(rules: list[Rule], expr: Any, context: Any = None, 
-                         max_iterations: int = 1000) -> Any:
+def apply_rules_repeatedly(
+    rules: list[Rule], expr: Any, context: Any = None, max_iterations: int = 1000
+) -> Any:
     """
     Apply rules repeatedly until fixed point or max iterations.
     """

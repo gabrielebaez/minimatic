@@ -1,22 +1,32 @@
 """Tests for Matcher module."""
+
 from __future__ import annotations
 
-import pytest
-from src.core.symbol import Symbol
-from src.core.expression import Expression
 from src.core.attributes import Flat, Orderless
-from src.pattern.blanks import blank, blank_seq, blank_null_seq, Blank
-from src.pattern.structural import (
-    pattern, condition, alternatives, pattern_test,
-    optional, repeated, repeated_null, except_pattern,
-    verbatim, hold_pattern,
-)
-from src.pattern.matcher import (
-    match, matches, match_sequence, NO_MATCH, success,
-    find_matches, find_all_matches, count_matches,
-    replace_with_bindings,
-)
+from src.core.expression import Expression
+from src.core.symbol import Symbol
 from src.pattern.bindings import Bindings, empty_bindings
+from src.pattern.blanks import blank, blank_null_seq, blank_seq
+from src.pattern.matcher import (
+    NO_MATCH,
+    find_all_matches,
+    match,
+    match_sequence,
+    matches,
+    replace_with_bindings,
+    success,
+)
+from src.pattern.structural import (
+    alternatives,
+    condition,
+    except_pattern,
+    hold_pattern,
+    pattern,
+    pattern_test,
+    repeated,
+    repeated_null,
+    verbatim,
+)
 
 Plus = Symbol("Plus")
 Times = Symbol("Times")
@@ -47,6 +57,7 @@ class TestMatchBasic:
 
     def test_expression_match(self):
         from src.pattern.structural import pattern as mk_pattern
+
         pat = Expression(Plus, mk_pattern(x), mk_pattern(y))
         expr = Expression(Plus, 1, 2)
         result = match(pat, expr)
@@ -218,6 +229,7 @@ class TestMatchSequence:
 class TestMatchFlat:
     def test_flat_attribute(self):
         from src.pattern.structural import pattern as mk_pattern
+
         # Plus[Plus[1, 2]] with Flat flattens to Plus[1, 2]
         pat = Expression(Plus, mk_pattern(x), mk_pattern(y))
         expr = Expression(Plus, Expression(Plus, 1, 2))
@@ -230,6 +242,7 @@ class TestMatchFlat:
 class TestMatchOrderless:
     def test_orderless_attribute(self):
         from src.pattern.structural import pattern as mk_pattern
+
         pat = Expression(Plus, mk_pattern(x), mk_pattern(y))
         expr = Expression(Plus, 2, 1)
         result = match(pat, expr, expr_attrs=frozenset({Orderless}))

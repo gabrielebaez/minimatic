@@ -35,68 +35,45 @@ Usage:
 """
 
 # from __future__ import annotations
+from collections.abc import Callable, Iterator
+from dataclasses import dataclass
 from typing import (
-    Optional,
-    Union,
-    List,
-    Tuple,
-    Iterator,
-    Callable,
     TYPE_CHECKING,
 )
-from itertools import permutations
-from dataclasses import dataclass
 
 if TYPE_CHECKING:
     from src.core.atoms import Element
 
-from src.core.symbol import Symbol, is_symbol
-from src.core.expression import Expression, is_expr, head_of
 from src.core.atoms import is_atom
 from src.core.attributes import Flat, Orderless
+from src.core.expression import Expression, is_expr
+from src.core.symbol import Symbol, is_symbol
 
-from .bindings import Bindings, empty_bindings, BindingConflict
+from .bindings import BindingConflict, Bindings, empty_bindings
 from .blanks import (
-    Blank,
-    BlankSequence,
-    BlankNullSequence,
-    is_blank,
-    is_blank_sequence,
-    is_blank_null_sequence,
-    is_any_blank,
-    is_sequence_blank,
-    blank_head_constraint,
     blank_matches_head,
+    is_blank,
+    is_blank_null_sequence,
+    is_sequence_blank,
 )
 from .structural import (
-    Pattern,
-    Condition,
-    Alternatives,
-    PatternTest,
-    Optional as OptionalPattern,
-    Repeated,
-    RepeatedNull,
-    Except,
-    Verbatim,
-    HoldPattern,
-    is_pattern,
-    is_condition,
+    get_condition_pattern,
+    get_condition_test,
+    get_default_value,
     is_alternatives,
-    is_pattern_test,
+    is_condition,
+    is_except,
+    is_hold_pattern,
     is_optional,
+    is_pattern,
+    is_pattern_test,
     is_repeated,
     is_repeated_null,
-    is_except,
     is_verbatim,
-    is_hold_pattern,
-    pattern_name,
     pattern_blank,
-    get_condition_test,
-    get_condition_pattern,
+    pattern_name,
     unwrap_hold_pattern,
-    get_default_value,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # CONFIGURATION
@@ -110,6 +87,7 @@ DEFAULT_MAX_DEPTH = 128
 # MATCH RESULT TYPE
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
 @dataclass(frozen=True)
 class MatchResult:
     """
@@ -119,6 +97,7 @@ class MatchResult:
         success: Whether the match succeeded.
         bindings: The variable bindings if successful.
     """
+
     success: bool
     bindings: Bindings
 
@@ -126,11 +105,11 @@ class MatchResult:
         """Allow using MatchResult in boolean context."""
         return self.success
 
-    def __getitem__(self, key: Symbol) -> "Element":
+    def __getitem__(self, key: Symbol) -> Element:
         """Access bindings directly."""
         return self.bindings[key]
 
-    def get(self, key: Symbol, default: "Element" = None) -> "Element":
+    def get(self, key: Symbol, default: Element = None) -> Element:
         """Get binding with default."""
         return self.bindings.get(key, default)
 
@@ -139,7 +118,7 @@ class MatchResult:
 NO_MATCH = MatchResult(success=False, bindings=empty_bindings())
 
 
-def success(bindings: Optional[Bindings] = None) -> MatchResult:
+def success(bindings: Bindings | None = None) -> MatchResult:
     """Create a successful match result."""
     if bindings is None:
         bindings = empty_bindings()
@@ -150,13 +129,14 @@ def success(bindings: Optional[Bindings] = None) -> MatchResult:
 # MAIN MATCHING FUNCTIONS
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
 def match(
-    pattern: "Element",
-    expr: "Element",
-    bindings: Optional[Bindings] = None,
-    evaluator: Optional[Callable[["Element"], "Element"]] = None,
+    pattern: Element,
+    expr: Element,
+    bindings: Bindings | None = None,
+    evaluator: Callable[[Element], Element] | None = None,
     max_depth: int = DEFAULT_MAX_DEPTH,
-    expr_attrs: Optional[frozenset] = None,
+    expr_attrs: frozenset | None = None,
 ) -> MatchResult:
     """
     Match a pattern against an expression.
@@ -183,9 +163,9 @@ def match(
 
 
 def matches(
-    pattern: "Element",
-    expr: "Element",
-    evaluator: Optional[Callable[["Element"], "Element"]] = None,
+    pattern: Element,
+    expr: Element,
+    evaluator: Callable[[Element], Element] | None = None,
 ) -> bool:
     """
     Check if a pattern matches an expression.
@@ -194,10 +174,10 @@ def matches(
 
 
 def match_sequence(
-    patterns: Tuple["Element", ...],
-    exprs: Tuple["Element", ...],
-    bindings: Optional[Bindings] = None,
-    evaluator: Optional[Callable[["Element"], "Element"]] = None,
+    patterns: tuple[Element, ...],
+    exprs: tuple[Element, ...],
+    bindings: Bindings | None = None,
+    evaluator: Callable[[Element], Element] | None = None,
     flat: bool = False,
     orderless: bool = False,
 ) -> Iterator[Bindings]:
@@ -210,8 +190,14 @@ def match_sequence(
         bindings = empty_bindings()
 
     yield from _match_sequence_impl(
-        patterns, exprs, bindings, evaluator, flat, orderless,
-        DEFAULT_MAX_DEPTH, 0,
+        patterns,
+        exprs,
+        bindings,
+        evaluator,
+        flat,
+        orderless,
+        DEFAULT_MAX_DEPTH,
+        0,
     )
 
 
@@ -219,14 +205,15 @@ def match_sequence(
 # INTERNAL MATCHING IMPLEMENTATION
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
 def _match_impl(
-    pattern: "Element",
-    expr: "Element",
+    pattern: Element,
+    expr: Element,
     bindings: Bindings,
-    evaluator: Optional[Callable[["Element"], "Element"]],
+    evaluator: Callable[[Element], Element] | None,
     max_depth: int,
     depth: int,
-    expr_attrs: Optional[frozenset] = None,
+    expr_attrs: frozenset | None = None,
 ) -> MatchResult:
     """Internal implementation of pattern matching."""
 
@@ -290,7 +277,9 @@ def _match_impl(
             return NO_MATCH
 
         # First match the inner pattern
-        inner_result = _match_impl(inner_pat, expr, bindings, evaluator, max_depth, depth + 1, expr_attrs)
+        inner_result = _match_impl(
+            inner_pat, expr, bindings, evaluator, max_depth, depth + 1, expr_attrs
+        )
         if not inner_result.success:
             return NO_MATCH
 
@@ -328,7 +317,9 @@ def _match_impl(
         test_func = pattern.args[1]
 
         # First match the inner pattern
-        inner_result = _match_impl(inner_pat, expr, bindings, evaluator, max_depth, depth + 1, expr_attrs)
+        inner_result = _match_impl(
+            inner_pat, expr, bindings, evaluator, max_depth, depth + 1, expr_attrs
+        )
         if not inner_result.success:
             return NO_MATCH
 
@@ -353,14 +344,18 @@ def _match_impl(
         excluded = pattern.args[0]
 
         # Check if excluded pattern matches
-        excluded_result = _match_impl(excluded, expr, bindings, evaluator, max_depth, depth + 1, expr_attrs)
+        excluded_result = _match_impl(
+            excluded, expr, bindings, evaluator, max_depth, depth + 1, expr_attrs
+        )
         if excluded_result.success:
             return NO_MATCH  # Excluded matched → fail
 
         # If there's an alternative pattern, it must match
         if len(pattern.args) >= 2:
             alternative = pattern.args[1]
-            return _match_impl(alternative, expr, bindings, evaluator, max_depth, depth + 1, expr_attrs)
+            return _match_impl(
+                alternative, expr, bindings, evaluator, max_depth, depth + 1, expr_attrs
+            )
 
         # No alternative, just check that excluded didn't match
         return success(bindings)
@@ -403,7 +398,9 @@ def _match_impl(
     # ─────────────────────────────────────────────────────────────────────────
     if is_expr(pattern) and is_expr(expr):
         # Match heads
-        head_result = _match_impl(pattern.head, expr.head, bindings, evaluator, max_depth, depth + 1, expr_attrs)
+        head_result = _match_impl(
+            pattern.head, expr.head, bindings, evaluator, max_depth, depth + 1, expr_attrs
+        )
         if not head_result.success:
             return NO_MATCH
 
@@ -412,7 +409,7 @@ def _match_impl(
         if expr_attrs is not None:
             flat = Flat in expr_attrs
             orderless = Orderless in expr_attrs
-        elif hasattr(expr, 'has_attr'):
+        elif hasattr(expr, "has_attr"):
             flat = expr.has_attr(Flat)
             orderless = expr.has_attr(Orderless)
         else:
@@ -428,8 +425,14 @@ def _match_impl(
 
         # Match arguments
         for matched_bindings in _match_sequence_impl(
-            p_args, e_args, head_result.bindings, evaluator,
-            flat, orderless, max_depth, depth + 1,
+            p_args,
+            e_args,
+            head_result.bindings,
+            evaluator,
+            flat,
+            orderless,
+            max_depth,
+            depth + 1,
         ):
             return success(matched_bindings)
 
@@ -441,7 +444,7 @@ def _match_impl(
     return NO_MATCH
 
 
-def _flatten_args(args: tuple, head: "Element") -> tuple:
+def _flatten_args(args: tuple, head: Element) -> tuple:
     """
     Flatten nested expressions with the same head.
 
@@ -460,16 +463,17 @@ def _flatten_args(args: tuple, head: "Element") -> tuple:
 # SEQUENCE MATCHING
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
 def _match_sequence_impl(
-    patterns: Tuple["Element", ...],
-    exprs: Tuple["Element", ...],
+    patterns: tuple[Element, ...],
+    exprs: tuple[Element, ...],
     bindings: Bindings,
-    evaluator: Optional[Callable[["Element"], "Element"]],
+    evaluator: Callable[[Element], Element] | None,
     flat: bool,
     orderless: bool,
     max_depth: int,
     depth: int,
-    expr_attrs: Optional[frozenset] = None,
+    expr_attrs: frozenset | None = None,
 ) -> Iterator[Bindings]:
     """
     Internal implementation of sequence matching.
@@ -501,11 +505,17 @@ def _match_sequence_impl(
 
         if inner is not None:
             # Try matching with the inner pattern
-            for b in _match_sequence_impl(
-                (inner,) + rest_patterns, exprs, bindings,
-                evaluator, flat, orderless, max_depth, depth + 1, expr_attrs,
-            ):
-                yield b
+            yield from _match_sequence_impl(
+                (inner,) + rest_patterns,
+                exprs,
+                bindings,
+                evaluator,
+                flat,
+                orderless,
+                max_depth,
+                depth + 1,
+                expr_attrs,
+            )
 
         # Try matching as absent: bind default, continue with rest
         if default is not None and is_pattern(inner):
@@ -514,16 +524,30 @@ def _match_sequence_impl(
                 try:
                     new_bindings = bindings.bind(name, default)
                     yield from _match_sequence_impl(
-                        rest_patterns, exprs, new_bindings,
-                        evaluator, flat, orderless, max_depth, depth + 1, expr_attrs,
+                        rest_patterns,
+                        exprs,
+                        new_bindings,
+                        evaluator,
+                        flat,
+                        orderless,
+                        max_depth,
+                        depth + 1,
+                        expr_attrs,
                     )
                 except BindingConflict:
                     pass
         elif default is not None and is_blank(inner):
             # Unnamed optional: just skip
             yield from _match_sequence_impl(
-                rest_patterns, exprs, bindings,
-                evaluator, flat, orderless, max_depth, depth + 1, expr_attrs,
+                rest_patterns,
+                exprs,
+                bindings,
+                evaluator,
+                flat,
+                orderless,
+                max_depth,
+                depth + 1,
+                expr_attrs,
             )
         return
 
@@ -545,7 +569,8 @@ def _match_sequence_impl(
         # Compute minimum expressions needed by remaining patterns.
         # BlankNullSequence needs 0, everything else needs at least 1.
         min_needed_rest = sum(
-            1 for p in rest_patterns
+            1
+            for p in rest_patterns
             if not (is_blank_null_sequence(p) or _is_named_null_sequence_pattern(p))
         )
 
@@ -556,9 +581,7 @@ def _match_sequence_impl(
 
             # Check head constraints for each matched expression
             if blank_part is not None:
-                all_match = all(
-                    blank_matches_head(blank_part, e) for e in matched_exprs
-                )
+                all_match = all(blank_matches_head(blank_part, e) for e in matched_exprs)
                 if not all_match:
                     continue
 
@@ -574,8 +597,15 @@ def _match_sequence_impl(
 
             # Continue matching rest of patterns
             yield from _match_sequence_impl(
-                rest_patterns, remaining_exprs, new_bindings,
-                evaluator, flat, orderless, max_depth, depth + 1, expr_attrs,
+                rest_patterns,
+                remaining_exprs,
+                new_bindings,
+                evaluator,
+                flat,
+                orderless,
+                max_depth,
+                depth + 1,
+                expr_attrs,
             )
         return
 
@@ -599,7 +629,9 @@ def _match_sequence_impl(
             all_ok = True
             new_bindings = bindings
             for e in matched_exprs:
-                result = _match_impl(inner, e, new_bindings, evaluator, max_depth, depth + 1, expr_attrs)
+                result = _match_impl(
+                    inner, e, new_bindings, evaluator, max_depth, depth + 1, expr_attrs
+                )
                 if not result.success:
                     all_ok = False
                     break
@@ -607,8 +639,15 @@ def _match_sequence_impl(
 
             if all_ok:
                 yield from _match_sequence_impl(
-                    rest_patterns, remaining_exprs, new_bindings,
-                    evaluator, flat, orderless, max_depth, depth + 1, expr_attrs,
+                    rest_patterns,
+                    remaining_exprs,
+                    new_bindings,
+                    evaluator,
+                    flat,
+                    orderless,
+                    max_depth,
+                    depth + 1,
+                    expr_attrs,
                 )
         return
 
@@ -631,7 +670,9 @@ def _match_sequence_impl(
             all_ok = True
             new_bindings = bindings
             for e in matched_exprs:
-                result = _match_impl(inner, e, new_bindings, evaluator, max_depth, depth + 1, expr_attrs)
+                result = _match_impl(
+                    inner, e, new_bindings, evaluator, max_depth, depth + 1, expr_attrs
+                )
                 if not result.success:
                     all_ok = False
                     break
@@ -639,8 +680,15 @@ def _match_sequence_impl(
 
             if all_ok:
                 yield from _match_sequence_impl(
-                    rest_patterns, remaining_exprs, new_bindings,
-                    evaluator, flat, orderless, max_depth, depth + 1, expr_attrs,
+                    rest_patterns,
+                    remaining_exprs,
+                    new_bindings,
+                    evaluator,
+                    flat,
+                    orderless,
+                    max_depth,
+                    depth + 1,
+                    expr_attrs,
                 )
         return
 
@@ -653,10 +701,17 @@ def _match_sequence_impl(
             expr = exprs[i]
             result = _match_impl(pat, expr, bindings, evaluator, max_depth, depth + 1, expr_attrs)
             if result.success:
-                remaining = exprs[:i] + exprs[i+1:]
+                remaining = exprs[:i] + exprs[i + 1 :]
                 yield from _match_sequence_impl(
-                    rest_patterns, remaining, result.bindings,
-                    evaluator, flat, False, max_depth, depth + 1, expr_attrs,
+                    rest_patterns,
+                    remaining,
+                    result.bindings,
+                    evaluator,
+                    flat,
+                    False,
+                    max_depth,
+                    depth + 1,
+                    expr_attrs,
                 )
         return
 
@@ -672,12 +727,19 @@ def _match_sequence_impl(
     result = _match_impl(pat, expr, bindings, evaluator, max_depth, depth + 1, expr_attrs)
     if result.success:
         yield from _match_sequence_impl(
-            rest_patterns, rest_exprs, result.bindings,
-            evaluator, flat, orderless, max_depth, depth + 1, expr_attrs,
+            rest_patterns,
+            rest_exprs,
+            result.bindings,
+            evaluator,
+            flat,
+            orderless,
+            max_depth,
+            depth + 1,
+            expr_attrs,
         )
 
 
-def _is_named_sequence_pattern(pattern: "Element") -> bool:
+def _is_named_sequence_pattern(pattern: Element) -> bool:
     """Check if pattern is Pattern[name, BlankSequence|BlankNullSequence]."""
     if not is_pattern(pattern):
         return False
@@ -685,7 +747,7 @@ def _is_named_sequence_pattern(pattern: "Element") -> bool:
     return inner is not None and is_sequence_blank(inner)
 
 
-def _is_named_null_sequence_pattern(pattern: "Element") -> bool:
+def _is_named_null_sequence_pattern(pattern: Element) -> bool:
     """Check if pattern is Pattern[name, BlankNullSequence]."""
     if not is_pattern(pattern):
         return False
@@ -711,10 +773,11 @@ def _min_exprs_for_patterns(patterns: tuple) -> int:
 # SUBSTITUTION
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
 def replace_with_bindings(
-    expr: "Element",
+    expr: Element,
     bindings: Bindings,
-) -> "Element":
+) -> Element:
     """
     Substitute bound values into an expression.
 
@@ -727,7 +790,7 @@ def replace_with_bindings(
     return _replace_impl(expr, bindings)
 
 
-def _replace_impl(expr: "Element", bindings: Bindings) -> "Element":
+def _replace_impl(expr: Element, bindings: Bindings) -> Element:
     """Internal implementation of substitution."""
 
     # Check if this is a bound symbol
@@ -744,7 +807,7 @@ def _replace_impl(expr: "Element", bindings: Bindings) -> "Element":
         new_args = tuple(_replace_impl(arg, bindings) for arg in expr.args)
 
         # Flatten List-bound sequences in arguments
-        flattened_args: List["Element"] = []
+        flattened_args: list[Element] = []
         for arg in new_args:
             if is_expr(arg) and arg.head == Symbol("List"):
                 # Flatten List[...] into argument list
@@ -765,11 +828,12 @@ def _replace_impl(expr: "Element", bindings: Bindings) -> "Element":
 # FINDING MATCHES
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
 def find_matches(
-    pattern: "Element",
-    expr: "Element",
-    evaluator: Optional[Callable[["Element"], "Element"]] = None,
-) -> Iterator[Tuple["Element", Bindings]]:
+    pattern: Element,
+    expr: Element,
+    evaluator: Callable[[Element], Element] | None = None,
+) -> Iterator[tuple[Element, Bindings]]:
     """
     Find all subexpressions that match a pattern.
 
@@ -786,10 +850,10 @@ def find_matches(
 
 
 def find_all_matches(
-    pattern: "Element",
-    expr: "Element",
-    evaluator: Optional[Callable[["Element"], "Element"]] = None,
-) -> List[Tuple["Element", Bindings]]:
+    pattern: Element,
+    expr: Element,
+    evaluator: Callable[[Element], Element] | None = None,
+) -> list[tuple[Element, Bindings]]:
     """
     Find all subexpressions that match a pattern (list version).
     """
@@ -797,9 +861,9 @@ def find_all_matches(
 
 
 def count_matches(
-    pattern: "Element",
-    expr: "Element",
-    evaluator: Optional[Callable[["Element"], "Element"]] = None,
+    pattern: Element,
+    expr: Element,
+    evaluator: Callable[[Element], Element] | None = None,
 ) -> int:
     """
     Count how many subexpressions match a pattern.

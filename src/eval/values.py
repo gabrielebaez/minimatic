@@ -6,11 +6,9 @@ Implements the Wolfram Language value storage hierarchy.
 """
 
 from dataclasses import dataclass
-from typing import Any, Optional, Union
+from typing import Any
 
-from src.core import Symbol, Expression
-from src.pattern import Bindings, pattern
-
+from src.core import Expression, Symbol
 
 # Type aliases for value entries
 ValueEntry = tuple  # (pattern, replacement, condition=None)
@@ -71,32 +69,37 @@ class ValueStore:
         if sym in self._store:
             del self._store[sym]
 
-    def add_own_value(self, sym: Symbol, pattern_expr: Any, replacement: Any, 
-                      condition: Optional[Any] = None) -> None:
+    def add_own_value(
+        self, sym: Symbol, pattern_expr: Any, replacement: Any, condition: Any | None = None
+    ) -> None:
         """Add an OwnValue: sym -> replacement when pattern matches."""
         values = self.get_values(sym)
         values.own.append((pattern_expr, replacement, condition))
 
-    def add_down_value(self, sym: Symbol, pattern_expr: Expression, replacement: Any,
-                       condition: Optional[Any] = None) -> None:
+    def add_down_value(
+        self, sym: Symbol, pattern_expr: Expression, replacement: Any, condition: Any | None = None
+    ) -> None:
         """Add a DownValue: sym[args] -> replacement."""
         values = self.get_values(sym)
         values.down.append((pattern_expr, replacement, condition))
 
-    def add_up_value(self, sym: Symbol, pattern_expr: Expression, replacement: Any,
-                     condition: Optional[Any] = None) -> None:
+    def add_up_value(
+        self, sym: Symbol, pattern_expr: Expression, replacement: Any, condition: Any | None = None
+    ) -> None:
         """Add an UpValue: pattern containing sym -> replacement."""
         values = self.get_values(sym)
         values.up.append((pattern_expr, replacement, condition))
 
-    def add_sub_value(self, sym: Symbol, pattern_expr: Expression, replacement: Any,
-                      condition: Optional[Any] = None) -> None:
+    def add_sub_value(
+        self, sym: Symbol, pattern_expr: Expression, replacement: Any, condition: Any | None = None
+    ) -> None:
         """Add a SubValue: sym[args1][args2] -> replacement."""
         values = self.get_values(sym)
         values.sub.append((pattern_expr, replacement, condition))
 
-    def add_n_value(self, sym: Symbol, pattern_expr: Expression, replacement: Any,
-                    condition: Optional[Any] = None) -> None:
+    def add_n_value(
+        self, sym: Symbol, pattern_expr: Expression, replacement: Any, condition: Any | None = None
+    ) -> None:
         """Add an NValue: N[sym[args]] -> replacement."""
         values = self.get_values(sym)
         values.n.append((pattern_expr, replacement, condition))
@@ -106,14 +109,16 @@ class ValueStore:
         values = self.get_values(sym)
         values.default = value
 
-    def add_format_value(self, sym: Symbol, pattern_expr: Expression, replacement: Any,
-                         condition: Optional[Any] = None) -> None:
+    def add_format_value(
+        self, sym: Symbol, pattern_expr: Expression, replacement: Any, condition: Any | None = None
+    ) -> None:
         """Add a FormatValue: sym[args] -> format_spec."""
         values = self.get_values(sym)
         values.format.append((pattern_expr, replacement, condition))
 
 
 # Convenience functions for context-based value access
+
 
 def get_value(ctx, sym: Symbol, value_type: str) -> list:
     """
@@ -159,7 +164,7 @@ def set_value(ctx, sym: Symbol, value_type: str, values: Any) -> None:
         raise ValueError(f"Unknown value type: {value_type}")
 
 
-def clear_value(ctx, sym: Symbol, value_type: Optional[str] = None) -> None:
+def clear_value(ctx, sym: Symbol, value_type: str | None = None) -> None:
     """Clear values. If value_type is None, clear all."""
     if value_type is None:
         ctx.clear_all_values(sym)

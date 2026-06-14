@@ -1,16 +1,20 @@
 """Tests for Rules module."""
+
 from __future__ import annotations
 
-import pytest
-from src.core.symbol import Symbol
 from src.core.expression import Expression, is_expr
+from src.core.symbol import Symbol
 from src.eval.rules import (
-    Rule, RuleType, RuleImmediate, RuleDelayed,
-    is_rule, is_rule_immediate, is_rule_delayed,
-    apply_rule, try_rules, apply_rules_repeatedly,
+    RuleDelayed,
+    RuleImmediate,
+    apply_rule,
+    apply_rules_repeatedly,
+    is_rule,
+    is_rule_delayed,
+    is_rule_immediate,
+    try_rules,
 )
 from src.pattern.structural import pattern
-from src.pattern.blanks import blank
 
 Plus = Symbol("Plus")
 x = Symbol("x")
@@ -86,6 +90,7 @@ class TestApplyRule:
             if val is None:
                 return 0
             return val * 2
+
         r = RuleImmediate(pattern(x), my_func)
         result, success = apply_rule(r, 5)
         assert success

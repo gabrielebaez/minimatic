@@ -1,14 +1,25 @@
 """Tests for Values module."""
+
 from __future__ import annotations
 
-from src.core.symbol import Symbol
 from src.core.expression import Expression
-from src.eval.values import (
-    Values, ValueStore, get_value, set_value, clear_value,
-    OwnValues, DownValues, UpValues, SubValues, NValues,
-    DefaultValues, FormatValues, ALL_VALUE_TYPES,
-)
+from src.core.symbol import Symbol
 from src.eval.context import EvaluationContext
+from src.eval.values import (
+    ALL_VALUE_TYPES,
+    DefaultValues,
+    DownValues,
+    FormatValues,
+    NValues,
+    OwnValues,
+    SubValues,
+    UpValues,
+    Values,
+    ValueStore,
+    clear_value,
+    get_value,
+    set_value,
+)
 
 x = Symbol("x")
 f = Symbol("f")
@@ -118,6 +129,7 @@ class TestContextBasedAccess:
     def test_unknown_type_raises(self):
         ctx = EvaluationContext("test")
         from pytest import raises
+
         with raises(ValueError, match="Unknown"):
             get_value(ctx, x, "invalid")
 

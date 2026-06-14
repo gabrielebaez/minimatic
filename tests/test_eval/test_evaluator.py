@@ -1,17 +1,23 @@
 """Tests for Evaluator module."""
+
 from __future__ import annotations
 
 import pytest
-from src.core.symbol import Symbol, clear_symbol_cache
-from src.core.expression import Expression, is_expr
-from src.core.attributes import Flat, Orderless, Listable, HoldAll, HoldFirst, HoldRest
+
+from src.core.attributes import HoldAll, HoldFirst
+from src.core.expression import Expression
+from src.core.symbol import Symbol
+from src.eval.context import EvaluationContext
 from src.eval.evaluator import (
-    evaluate, try_evaluate, evaluate_iterated, FixedPoint,
-    set_recursion_limit, set_iteration_limit,
-    get_recursion_limit, get_iteration_limit,
-    RecursionLimitError, IterationLimitError,
+    FixedPoint,
+    RecursionLimitError,
+    evaluate,
+    evaluate_iterated,
+    get_iteration_limit,
+    set_iteration_limit,
+    set_recursion_limit,
+    try_evaluate,
 )
-from src.eval.context import EvaluationContext, with_context
 
 Plus = Symbol("Plus")
 Times = Symbol("Times")
@@ -39,7 +45,7 @@ class TestEvaluateAtoms:
         assert evaluate("hello") == "hello"
 
     def test_complex(self):
-        assert evaluate(1+2j) == 1+2j
+        assert evaluate(1 + 2j) == 1 + 2j
 
 
 class TestEvaluateSymbol:
@@ -56,6 +62,7 @@ class TestEvaluateSymbol:
 class TestEvaluateExpression:
     def test_expression_with_builtin(self):
         import src.builtins.arithmetic  # noqa: F401
+
         ctx = EvaluationContext("test")
         result = evaluate(Expression(Plus, 1, 2), ctx)
         # After Plus builtin: numeric sum = 3, returns 3
