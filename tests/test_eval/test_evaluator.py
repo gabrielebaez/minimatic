@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
+import threading
+
 import pytest
 
-from src.core.attributes import HoldAll, HoldFirst
-from src.core.expression import Expression
-from src.core.symbol import Symbol
-from src.eval.context import EvaluationContext
-from src.eval.evaluator import (
+from minimatic.core.attributes import HoldAll, HoldFirst
+from minimatic.core.expression import Expression
+from minimatic.core.symbol import Symbol
+from minimatic.eval.context import EvaluationContext
+from minimatic.eval.evaluator import (
     FixedPoint,
     RecursionLimitError,
+    _get_eval_state,
     evaluate,
     evaluate_iterated,
     get_iteration_limit,
@@ -61,7 +64,7 @@ class TestEvaluateSymbol:
 
 class TestEvaluateExpression:
     def test_expression_with_builtin(self):
-        import src.builtins.arithmetic  # noqa: F401
+        import minimatic.builtins.arithmetic  # noqa: F401
 
         ctx = EvaluationContext("test")
         result = evaluate(Expression(Plus, 1, 2), ctx)
@@ -138,3 +141,75 @@ class TestTryEvaluate:
         ctx.set_own_values(x, [(x, Expression(x), None)])
         result = try_evaluate(x, ctx, default="fallback")
         assert result == "fallback"
+
+    def test_try_evaluate_propagates_programming_errors(self):
+        """TypeError from bad code should NOT be swallowed."""
+        with pytest.raises(TypeError):
+            try_evaluate(Expression(42, 1))
+
+    def test_try_evaluate_only_catches_limit_errors(self):
+        """Only RecursionLimitError and IterationLimitError should be caught."""
+        set_recursion_limit(2)
+        ctx = EvaluationContext("test")
+        ctx.set_own_values(x, [(x, Expression(x), None)])
+        result = try_evaluate(x, ctx, default="fallback")
+        assert result == "fallback"
+
+
+class TestThreadSafety:
+    def test_eval_state_is_thread_local(self):
+        """Each thread should have independent recursion depth."""
+        results = []
+        errors = []
+
+        def worker():
+            try:
+                state = _get_eval_state()
+                # Each thread starts with depth 0 (or whatever it was before)
+                initial_depth = state.recursion_depth
+                results.append(("initial", initial_depth))
+                # Increment depth in this thread
+                state.recursion_depth += 1
+                results.append(("incremented", state.recursion_depth))
+            except Exception as e:
+                errors.append(e)
+
+        t1 = threading.Thread(target=worker)
+        t2 = threading.Thread(target=worker)
+        t1.start()
+        t2.start()
+        t1.join()
+        t2.join()
+
+        assert not errors, f"Thread errors: {errors}"
+        # Both threads should see depth increment to 1
+        assert all(r[1] == 1 for r in results if r[0] == "incremented")
+        # Main thread should still be at 0
+        assert _get_eval_state().recursion_depth == 0
+
+    def test_concurrent_symbol_creation(self):
+        """Concurrent symbol creation should not crash or lose data."""
+        from minimatic.core.symbol import Symbol, clear_symbol_cache
+
+        clear_symbol_cache()
+        errors = []
+        results = []
+
+        def worker(thread_id):
+            try:
+                for i in range(50):
+                    sym = Symbol(f"thread_{thread_id}_sym_{i}")
+                    results.append(sym)
+            except Exception as e:
+                errors.append(e)
+
+        threads = [threading.Thread(target=worker, args=(i,)) for i in range(4)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+
+        assert not errors, f"Thread errors: {errors}"
+        assert len(results) == 200
+        # All symbols should be unique (different names)
+        assert len(set(id(s) for s in results)) == 200

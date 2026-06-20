@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from src.core.attributes import Flat, Orderless
-from src.core.expression import Expression
-from src.core.symbol import Symbol
-from src.pattern.bindings import Bindings, empty_bindings
-from src.pattern.blanks import blank, blank_null_seq, blank_seq
-from src.pattern.matcher import (
+from minimatic.core.attributes import Flat, Orderless
+from minimatic.core.expression import Expression
+from minimatic.core.symbol import Symbol
+from minimatic.pattern.bindings import Bindings, empty_bindings
+from minimatic.pattern.blanks import blank, blank_null_seq, blank_seq
+from minimatic.pattern.matcher import (
     NO_MATCH,
     find_all_matches,
     match,
@@ -16,7 +16,7 @@ from src.pattern.matcher import (
     replace_with_bindings,
     success,
 )
-from src.pattern.structural import (
+from minimatic.pattern.structural import (
     alternatives,
     condition,
     except_pattern,
@@ -56,7 +56,7 @@ class TestMatchBasic:
         assert not matches(x, y)
 
     def test_expression_match(self):
-        from src.pattern.structural import pattern as mk_pattern
+        from minimatic.pattern.structural import pattern as mk_pattern
 
         pat = Expression(Plus, mk_pattern(x), mk_pattern(y))
         expr = Expression(Plus, 1, 2)
@@ -228,7 +228,7 @@ class TestMatchSequence:
 
 class TestMatchFlat:
     def test_flat_attribute(self):
-        from src.pattern.structural import pattern as mk_pattern
+        from minimatic.pattern.structural import pattern as mk_pattern
 
         # Plus[Plus[1, 2]] with Flat flattens to Plus[1, 2]
         pat = Expression(Plus, mk_pattern(x), mk_pattern(y))
@@ -241,7 +241,7 @@ class TestMatchFlat:
 
 class TestMatchOrderless:
     def test_orderless_attribute(self):
-        from src.pattern.structural import pattern as mk_pattern
+        from minimatic.pattern.structural import pattern as mk_pattern
 
         pat = Expression(Plus, mk_pattern(x), mk_pattern(y))
         expr = Expression(Plus, 2, 1)

@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import pytest
 
-from src.core.expression import Expression
-from src.core.symbol import Symbol
-from src.pattern.blanks import Blank, blank, blank_seq
-from src.pattern.structural import (
+from minimatic.core.expression import Expression
+from minimatic.core.symbol import Symbol
+from minimatic.pattern.blanks import Blank, blank, blank_seq
+from minimatic.pattern.structural import (
     Alternatives,
     Condition,
     Except,
@@ -46,7 +46,7 @@ from src.pattern.structural import (
     unwrap_hold_pattern,
     verbatim,
 )
-from src.pattern.structural import (
+from minimatic.pattern.structural import (
     Optional as OptionalPattern,
 )
 

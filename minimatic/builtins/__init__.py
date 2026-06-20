@@ -28,6 +28,7 @@ from .registry import (
     has_builtin,
     register_builtin,
 )
+from .io import Request
 
 __all__ = [
     # Registry
@@ -51,4 +52,6 @@ __all__ = [
     "Log",
     "Sum",
     "Product",
+    # Web
+    "Request",
 ]

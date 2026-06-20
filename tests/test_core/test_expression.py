@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from src.core.attributes import Flat, HoldAll, Orderless
-from src.core.expression import (
+from minimatic.core.attributes import Flat, HoldAll, Orderless
+from minimatic.core.expression import (
     Expression,
     attrs_of,
     has_attr,
@@ -13,7 +13,7 @@ from src.core.expression import (
     is_expr,
     tail_of,
 )
-from src.core.symbol import Symbol
+from minimatic.core.symbol import Symbol
 
 Plus = Symbol("Plus")
 x = Symbol("x")

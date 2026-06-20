@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from src.core.attributes import (
+from minimatic.core.attributes import (
     ALL_ATTRIBUTES,
     HOLD_ATTRIBUTES,
     PROTECTION_ATTRIBUTES,
@@ -26,7 +26,7 @@ from src.core.attributes import (
     is_listable,
     is_orderless,
 )
-from src.core.symbol import Symbol
+from minimatic.core.symbol import Symbol
 
 
 class TestAttributeSymbols:

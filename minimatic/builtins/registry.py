@@ -9,10 +9,10 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from src.core import Expression, Symbol
+from minimatic.core import Expression, Symbol
 
 if TYPE_CHECKING:
-    from src.eval.context import EvaluationContext
+    from minimatic.eval.context import EvaluationContext
 
 
 @dataclass

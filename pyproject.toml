@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "minimatic"
 version = "0.1.0"
@@ -26,4 +30,4 @@ quote-style = "double"
 [tool.pyright]
 pythonVersion = "3.14"
 typeCheckingMode = "standard"
-include = ["src"]
+include = ["minimatic"]

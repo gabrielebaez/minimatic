@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 # Force registration of builtins
-import src.builtins.arithmetic  # noqa: F401
-from src.core.expression import Expression, is_expr
-from src.core.symbol import Symbol
-from src.eval.evaluator import evaluate
+import minimatic.builtins.arithmetic  # noqa: F401
+from minimatic.core.expression import Expression, is_expr
+from minimatic.core.symbol import Symbol
+from minimatic.eval.evaluator import evaluate
 
 Plus = Symbol("Plus")
 Times = Symbol("Times")

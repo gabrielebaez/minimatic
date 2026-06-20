@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import pytest
 
-from src.core.expression import Expression
-from src.core.symbol import Symbol
-from src.pattern.blanks import (
+from minimatic.core.expression import Expression
+from minimatic.core.symbol import Symbol
+from minimatic.pattern.blanks import (
     Blank,
     BlankNullSequence,
     BlankSequence,

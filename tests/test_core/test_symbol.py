@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.core.symbol import (
+from minimatic.core.symbol import (
     Symbol,
     gensym,
     is_symbol,

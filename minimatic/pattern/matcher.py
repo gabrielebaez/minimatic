@@ -24,7 +24,7 @@ The matcher handles:
     - Sequence patterns (__, ___)
 
 Usage:
-    from src.pattern import match, matches, Bindings
+    from minimatic.pattern import match, matches, Bindings
 
     result = match(pattern, expression)
     if result:
@@ -42,12 +42,12 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from src.core.atoms import Element
+    from minimatic.core.atoms import Element
 
-from src.core.atoms import is_atom
-from src.core.attributes import Flat, Orderless
-from src.core.expression import Expression, is_expr
-from src.core.symbol import Symbol, is_symbol
+from minimatic.core.atoms import is_atom
+from minimatic.core.attributes import Flat, Orderless
+from minimatic.core.expression import Expression, is_expr
+from minimatic.core.symbol import Symbol, is_symbol
 
 from .bindings import BindingConflict, Bindings, empty_bindings
 from .blanks import (

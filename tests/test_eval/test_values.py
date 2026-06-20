@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from src.core.expression import Expression
-from src.core.symbol import Symbol
-from src.eval.context import EvaluationContext
-from src.eval.values import (
+from minimatic.core.expression import Expression
+from minimatic.core.symbol import Symbol
+from minimatic.eval.context import EvaluationContext
+from minimatic.eval.values import (
     ALL_VALUE_TYPES,
     DefaultValues,
     DownValues,

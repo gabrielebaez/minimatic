@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from src.core.expression import Expression, is_expr
-from src.core.symbol import Symbol
-from src.eval.rules import (
+from minimatic.core.expression import Expression, is_expr
+from minimatic.core.symbol import Symbol
+from minimatic.eval.rules import (
     RuleDelayed,
     RuleImmediate,
     apply_rule,
@@ -14,7 +14,7 @@ from src.eval.rules import (
     is_rule_immediate,
     try_rules,
 )
-from src.pattern.structural import pattern
+from minimatic.pattern.structural import pattern
 
 Plus = Symbol("Plus")
 x = Symbol("x")

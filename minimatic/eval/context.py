@@ -9,7 +9,7 @@ import threading
 from collections.abc import Mapping
 from typing import Any
 
-from src.core import Symbol
+from minimatic.core import Symbol
 
 
 class EvaluationContext:

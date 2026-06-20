@@ -3,10 +3,11 @@ Main evaluation loop implementing the Wolfram Language
 standard evaluation procedure.
 """
 
+import threading
 from collections.abc import Callable
 from typing import Any
 
-from src.core import (
+from minimatic.core import (
     Expression,
     Flat,
     HoldAll,
@@ -21,7 +22,7 @@ from src.core import (
     is_expr,
     is_symbol,
 )
-from src.pattern import match, replace_with_bindings
+from minimatic.pattern import match, replace_with_bindings
 
 from .context import EvaluationContext, get_current_context
 from .transforms import apply_flat, apply_listable, apply_orderless, flatten_sequences
@@ -34,7 +35,7 @@ def _get_builtin_dispatch():
     """Lazy import of built-in dispatch function."""
     global _builtin_dispatch
     if _builtin_dispatch is None:
-        from src.builtins.registry import dispatch_builtin
+        from minimatic.builtins.registry import dispatch_builtin
 
         _builtin_dispatch = dispatch_builtin
     return _builtin_dispatch
@@ -67,7 +68,14 @@ class EvalState:
         self.trace_enabled = False
 
 
-_eval_state = EvalState()
+_eval_thread_local = threading.local()
+
+
+def _get_eval_state() -> EvalState:
+    """Get or create thread-local EvalState."""
+    if not hasattr(_eval_thread_local, "state"):
+        _eval_thread_local.state = EvalState()
+    return _eval_thread_local.state
 
 
 def evaluate(expr: Any, context: EvaluationContext | None = None) -> Any:
@@ -94,10 +102,14 @@ def evaluate(expr: Any, context: EvaluationContext | None = None) -> Any:
         context = get_current_context()
 
     # Step 1: Check recursion limit
-    _eval_state.recursion_depth += 1
-    if _eval_state.recursion_depth > _eval_state.recursion_limit:
-        _eval_state.recursion_depth -= 1
-        raise RecursionLimitError(f"Recursion depth of {_eval_state.recursion_limit} exceeded")
+    state = _get_eval_state()
+    is_top_level = state.recursion_depth == 0
+    state.recursion_depth += 1
+    if is_top_level:
+        state.iteration_count = 0
+    if state.recursion_depth > state.recursion_limit:
+        state.recursion_depth -= 1
+        raise RecursionLimitError(f"Recursion depth of {state.recursion_limit} exceeded")
 
     try:
         # Step 1: Dispatch by expression type
@@ -117,7 +129,7 @@ def evaluate(expr: Any, context: EvaluationContext | None = None) -> Any:
         return _evaluate_expression(expr, context)
 
     finally:
-        _eval_state.recursion_depth -= 1
+        _get_eval_state().recursion_depth -= 1
 
 
 def _evaluate_symbol(sym: Symbol, context: EvaluationContext) -> Any:
@@ -200,9 +212,10 @@ def _evaluate_expression(expr: Expression, context: EvaluationContext) -> Any:
 
     # Step 3i: Check if changed and re-evaluate
     if new_expr != expr:
-        _eval_state.iteration_count += 1
-        if _eval_state.iteration_count > _eval_state.iteration_limit:
-            raise IterationLimitError(f"Iteration limit of {_eval_state.iteration_limit} exceeded")
+        state = _get_eval_state()
+        state.iteration_count += 1
+        if state.iteration_count > state.iteration_limit:
+            raise IterationLimitError(f"Iteration limit of {state.iteration_limit} exceeded")
 
         # Re-evaluate from top (Step 1)
         return evaluate(new_expr, context)
@@ -225,7 +238,7 @@ def _resolve_attributes(expr: Expression, context: EvaluationContext) -> frozens
         head_attrs = context.get_attributes(expr.head)
 
     # Also check built-in registered attributes
-    from src.builtins.registry import builtin_attributes
+    from minimatic.builtins.registry import builtin_attributes
 
     builtin_attrs = builtin_attributes(expr.head) if is_symbol(expr.head) else frozenset()
 
@@ -395,7 +408,7 @@ def try_evaluate(
     """
     try:
         return evaluate(expr, context)
-    except RecursionLimitError, IterationLimitError, Exception:
+    except RecursionLimitError, IterationLimitError:
         return default
 
 
@@ -442,23 +455,25 @@ def evaluate_iterated(expr: Any, n: int, context: EvaluationContext | None = Non
 
 def set_recursion_limit(limit: int) -> int:
     """Set $RecursionLimit and return old value."""
-    old = _eval_state.recursion_limit
-    _eval_state.recursion_limit = limit
+    state = _get_eval_state()
+    old = state.recursion_limit
+    state.recursion_limit = limit
     return old
 
 
 def set_iteration_limit(limit: int) -> int:
     """Set $IterationLimit and return old value."""
-    old = _eval_state.iteration_limit
-    _eval_state.iteration_limit = limit
+    state = _get_eval_state()
+    old = state.iteration_limit
+    state.iteration_limit = limit
     return old
 
 
 def get_recursion_limit() -> int:
     """Get current $RecursionLimit."""
-    return _eval_state.recursion_limit
+    return _get_eval_state().recursion_limit
 
 
 def get_iteration_limit() -> int:
     """Get current $IterationLimit."""
-    return _eval_state.iteration_limit
+    return _get_eval_state().iteration_limit

@@ -33,9 +33,9 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from src.core.atoms import Element
+    from minimatic.core.atoms import Element
 
-from src.core.symbol import Symbol
+from minimatic.core.symbol import Symbol
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # BINDINGS CLASS

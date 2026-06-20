@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from src.core.symbol import Symbol
-from src.eval.context import (
+from minimatic.core.symbol import Symbol
+from minimatic.eval.context import (
     ContextChain,
     EvaluationContext,
     GlobalContext,

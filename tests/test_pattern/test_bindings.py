@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from src.core.symbol import Symbol
-from src.pattern.bindings import (
+from minimatic.core.symbol import Symbol
+from minimatic.pattern.bindings import (
     BindingConflict,
     Bindings,
     bindings_compatible,

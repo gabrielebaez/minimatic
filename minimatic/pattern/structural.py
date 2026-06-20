@@ -29,8 +29,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from core.atoms import Element
 
-from src.core.expression import Expression, is_expr
-from src.core.symbol import Symbol
+from minimatic.core.expression import Expression, is_expr
+from minimatic.core.symbol import Symbol
 
 from .blanks import (
     Blank,

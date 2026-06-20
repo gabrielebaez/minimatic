@@ -2,8 +2,8 @@
 
 import pytest
 
-from src.core.symbol import Symbol, clear_symbol_cache
-from src.eval.context import EvaluationContext
+from minimatic.core.symbol import Symbol, clear_symbol_cache
+from minimatic.eval.context import EvaluationContext
 
 
 @pytest.fixture(autouse=True)

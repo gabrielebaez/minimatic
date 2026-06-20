@@ -7,7 +7,7 @@ Orderless sorting, and Listable threading.
 
 from typing import Any
 
-from src.core import Expression, Symbol, head_of, is_expr
+from minimatic.core import Expression, Symbol, head_of, is_expr
 
 
 def flatten_sequences(expr: Expression, hold_sequence: bool = False) -> Expression:

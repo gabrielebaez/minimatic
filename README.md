@@ -10,7 +10,7 @@ A minimal implementation of a Wolfram Language-style symbolic computation engine
 ## Architecture
 
 ```
-src/
+minimatic/
   core/          Fundamental data structures
     symbol.py      Immutable interned symbols
     expression.py  Immutable expressions: (head, args, attributes)
@@ -44,7 +44,7 @@ src/
 Interned, immutable symbolic identifiers. Two symbols with the same name are the same object.
 
 ```python
-from src.core import Symbol, symbol, gensym
+from minimatic.core import Symbol, symbol, gensym
 
 x = Symbol("x")
 y = symbol("y")
@@ -58,7 +58,7 @@ x is Symbol("x")   # True (interned)
 Immutable compound structures: `(head, args, attributes)`.
 
 ```python
-from src.core import Expression, Symbol
+from minimatic.core import Expression, Symbol
 
 Plus = Symbol("Plus")
 expr = Expression(Plus, 1, 2, 3)
@@ -68,7 +68,7 @@ expr.args       # (1, 2, 3)
 expr.attributes # frozenset()
 
 # With attributes
-from src.core import Hold
+from minimatic.core import Hold
 held = Expression(Plus, 1, 2, _attrs={Hold})
 held.has_attr(Hold)  # True
 ```
@@ -106,8 +106,8 @@ The evaluator implements the standard Wolfram Language evaluation procedure:
 ```
 
 ```python
-from src.core import Symbol, Expression
-from src.eval import evaluate, GlobalContext
+from minimatic.core import Symbol, Expression
+from minimatic.eval import evaluate, GlobalContext
 
 ctx = GlobalContext
 
@@ -161,9 +161,9 @@ Full Wolfram Language-style pattern matching with backtracking.
 | HoldPattern | `HoldPattern[pat]` | Prevent pattern evaluation |
 
 ```python
-from src.core import Symbol, Expression
-from src.core.attributes import Flat, Orderless
-from src.pattern import match, pattern, blank, blank_seq, alternatives, condition, optional, replace_with_bindings, Bindings
+from minimatic.core import Symbol, Expression
+from minimatic.core.attributes import Flat, Orderless
+from minimatic.pattern import match, pattern, blank, blank_seq, alternatives, condition, optional, replace_with_bindings, Bindings
 
 x, y = Symbol("x"), Symbol("y")
 Plus = Symbol("Plus")
@@ -175,7 +175,7 @@ r[x]        # 1
 r[y]        # 2
 
 # Head-constrained blank
-from src.core import Integer
+from minimatic.core import Integer
 match(blank(Integer), 42).success    # True
 match(blank(Integer), 3.14).success  # False
 
@@ -212,7 +212,7 @@ replace_with_bindings(Expression(Plus, x, y), b)  # Plus[1, 2]
 Immutable match results backed by `frozenset`. Safe for backtracking.
 
 ```python
-from src.pattern import Bindings, BindingConflict
+from minimatic.pattern import Bindings, BindingConflict
 
 b = Bindings({x: 42})
 b2 = b.bind(y, 3.14)  # New Bindings; b unchanged
@@ -242,9 +242,9 @@ Registered via `@register_builtin` decorator with attribute metadata.
 | `Product` | HoldRest | Product |
 
 ```python
-from src.core import Symbol, Expression
-from src.eval import evaluate, GlobalContext
-from src.builtins import arithmetic  # Registers all arithmetic builtins
+from minimatic.core import Symbol, Expression
+from minimatic.eval import evaluate, GlobalContext
+from minimatic.builtins import arithmetic  # Registers all arithmetic builtins
 
 ctx = GlobalContext
 Plus, Times, Power = Symbol("Plus"), Symbol("Times"), Symbol("Power")
@@ -263,18 +263,16 @@ evaluate(Expression(Plus, Expression(Times, 2, 3), 4), ctx)  # 10
 - **No lexer/AST** -- the `.m` example files are not yet parsed by this engine
 - **Limited built-ins** -- only arithmetic; no list, string, or logic functions
 - **No user-defined functions** -- `DownValues`/`UpValues` infrastructure exists but no syntactic sugar for defining them
-- **No symbolic algebra** -- no simplification, expansion, or factoring
 - **Performance** -- pure Python; no compilation or JIT
-- **Tests** -- no formal test suite; verified via ad-hoc scripts
 
 ---
 
 ## Running
 
 ```python
-from src.core import Symbol, Expression
-from src.eval import evaluate, GlobalContext
-from src.builtins import arithmetic
+from minimatic.core import Symbol, Expression
+from minimatic.eval import evaluate, GlobalContext
+from minimatic.builtins import arithmetic
 
 ctx = GlobalContext
 Plus = Symbol("Plus")

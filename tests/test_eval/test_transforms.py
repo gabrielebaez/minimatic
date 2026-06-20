@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from src.core.attributes import Flat, Listable, Orderless
-from src.core.expression import Expression
-from src.core.symbol import Symbol
-from src.eval.transforms import (
+from minimatic.core.attributes import Flat, Listable, Orderless
+from minimatic.core.expression import Expression
+from minimatic.core.symbol import Symbol
+from minimatic.eval.transforms import (
     _get_depth,
     _leaf_count,
     apply_flat,

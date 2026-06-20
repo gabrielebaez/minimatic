@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 # Force registration of builtins by importing arithmetic
-import src.builtins.arithmetic  # noqa: F401
-from src.builtins.registry import (
+import minimatic.builtins.arithmetic  # noqa: F401
+from minimatic.builtins.registry import (
     BuiltinRegistry,
     builtin_attributes,
     clear_registry,
     get_builtin,
     has_builtin,
 )
-from src.core.attributes import Flat, Listable, NumericFunction, Orderless
-from src.core.symbol import Symbol
+from minimatic.core.attributes import Flat, Listable, NumericFunction, Orderless
+from minimatic.core.symbol import Symbol
 
 
 class TestRegistry:
@@ -115,7 +115,7 @@ class TestBuiltinRegistry:
 class TestClearRegistry:
     def test_clear_and_restore(self):
         # Save current state
-        from src.builtins.registry import _registry
+        from minimatic.builtins.registry import _registry
 
         saved = dict(_registry)
         try:

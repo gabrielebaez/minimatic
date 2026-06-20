@@ -8,7 +8,7 @@ Implements the Wolfram Language value storage hierarchy.
 from dataclasses import dataclass
 from typing import Any
 
-from src.core import Expression, Symbol
+from minimatic.core import Expression, Symbol
 
 # Type aliases for value entries
 ValueEntry = tuple  # (pattern, replacement, condition=None)

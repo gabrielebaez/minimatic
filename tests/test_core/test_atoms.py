@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.core.atoms import (
+from minimatic.core.atoms import (
     atom_head,
     is_atom,
     is_boolean,
@@ -19,7 +19,7 @@ from src.core.atoms import (
     numeric_tower_promote,
     to_numeric,
 )
-from src.core.symbol import Symbol
+from minimatic.core.symbol import Symbol
 
 
 class TestTypePredicates:
