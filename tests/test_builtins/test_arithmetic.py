@@ -141,6 +141,33 @@ class TestLog:
         result = evaluate(Expression(Log, math.e), ctx)
         assert abs(result - 1) < 1e-10
 
+    def test_log_negative(self, ctx):
+        import cmath
+
+        result = evaluate(Expression(Log, -1), ctx)
+        # Log(-1) = i*pi in complex
+        assert isinstance(result, complex)
+        assert abs(result - 1j * cmath.pi) < 1e-10
+
+    def test_log_complex(self, ctx):
+        result = evaluate(Expression(Log, 1 + 1j), ctx)
+        assert isinstance(result, complex)
+
+
+class TestPowerBugFix:
+    def test_power_overflow(self, ctx):
+        # This should not crash - returns unevaluated expression
+        result = evaluate(Expression(Power, 10, 1000), ctx)
+        # Python handles big integers, so this should work
+        assert result == 10**1000
+
+    def test_power_zero_division(self, ctx):
+        # 0^(-1) should not crash
+        result = evaluate(Expression(Power, 0, -1), ctx)
+        # Returns unevaluated
+        assert is_expr(result)
+        assert result.head == Power
+
 
 class TestArithmeticIntegration:
     def test_nested_plus_times(self, ctx):
@@ -150,3 +177,45 @@ class TestArithmeticIntegration:
     def test_nested_power_plus(self, ctx):
         expr = Expression(Power, Expression(Plus, 2, 3), 2)
         assert evaluate(expr, ctx) == 25
+
+
+class TestSumExtended:
+    def test_sum_with_range(self, ctx):
+        # Sum[i, {i, 1, 10}] = 55
+        i = Symbol("i")
+        result = evaluate(
+            Expression(Sum, i, Expression(Symbol("List"), i, 1, 10)), ctx
+        )
+        assert result == 55
+
+    def test_sum_with_range_from_5(self, ctx):
+        # Sum[i, {i, 5, 8}] = 5+6+7+8 = 26
+        i = Symbol("i")
+        result = evaluate(
+            Expression(Sum, i, Expression(Symbol("List"), i, 5, 8)), ctx
+        )
+        assert result == 26
+
+    def test_sum_with_step(self, ctx):
+        # Sum[i, {i, 0, 10, 2}] = 0+2+4+6+8+10 = 30
+        i = Symbol("i")
+        result = evaluate(
+            Expression(Sum, i, Expression(Symbol("List"), i, 0, 10, 2)), ctx
+        )
+        assert result == 30
+
+    def test_product_with_range(self, ctx):
+        # Product[i, {i, 1, 5}] = 120
+        i = Symbol("i")
+        result = evaluate(
+            Expression(Product, i, Expression(Symbol("List"), i, 1, 5)), ctx
+        )
+        assert result == 120
+
+    def test_product_with_range_from_2(self, ctx):
+        # Product[i, {i, 2, 4}] = 2*3*4 = 24
+        i = Symbol("i")
+        result = evaluate(
+            Expression(Product, i, Expression(Symbol("List"), i, 2, 4)), ctx
+        )
+        assert result == 24

@@ -226,33 +226,96 @@ b.bind(x, 99)  # Raises BindingConflict
 
 Registered via `@register_builtin` decorator with attribute metadata.
 
-| Function | Attributes | Description |
-|----------|------------|-------------|
-| `Plus` | Flat, Orderless, Listable, NumericFunction | Addition |
-| `Times` | Flat, Orderless, Listable, NumericFunction | Multiplication |
-| `Power` | NumericFunction, Listable | Exponentiation |
-| `Minus` | Listable, NumericFunction | Unary minus |
-| `Divide` | Listable, NumericFunction | Division |
-| `Subtract` | Listable, NumericFunction | Binary subtraction |
-| `Abs` | Listable, NumericFunction | Absolute value |
-| `Sqrt` | Listable, NumericFunction | Square root |
-| `Exp` | Listable, NumericFunction | Exponential |
-| `Log` | Listable, NumericFunction | Logarithm |
-| `Sum` | HoldRest | Summation |
-| `Product` | HoldRest | Product |
+### Arithmetic
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `Plus` | `Plus[a, b, ...]` | Addition: `Plus[1, 2, 3]` → `6` |
+| `Times` | `Times[a, b, ...]` | Multiplication: `Times[2, 3, 4]` → `24` |
+| `Power` | `Power[base, exp]` | Exponentiation: `Power[2, 10]` → `1024` |
+| `Minus` | `Minus[x]` | Unary minus: `Minus[5]` → `-5` |
+| `Divide` | `Divide[num, den]` | Division: `Divide[10, 2]` → `5` |
+| `Subtract` | `Subtract[a, b]` | Subtraction: `Subtract[10, 3]` → `7` |
+| `Abs` | `Abs[x]` | Absolute value: `Abs[-5]` → `5` |
+| `Sqrt` | `Sqrt[x]` | Square root: `Sqrt[9]` → `3` |
+| `Exp` | `Exp[x]` | Exponential: `Exp[1]` → `2.718...` |
+| `Log` | `Log[x]` or `Log[base, x]` | Logarithm: `Log[E, 1024]` → `10` |
+| `Sum` | `Sum[expr, {i, n}]` | Summation: `Sum[i, {i, 1, 10}]` → `55` |
+| `Product` | `Product[expr, {i, n}]` | Product: `Product[i, {i, 1, 5}]` → `120` |
+
+### Control Flow
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `Set` | `Set[x, val]` | Immediate assignment: `Set[x, 5]` → `5` |
+| `SetDelayed` | `SetDelayed[x, body]` | Delayed assignment: `SetDelayed[x, Random[]]` |
+| `If` | `If[cond, then]` or `If[cond, then, else]` | Branch: `If[True, 1, 2]` → `1` |
+| `Which` | `Which[test1, val1, ...]` | Dispatch: `Which[False, "a", True, "b"]` → `"b"` |
+| `Switch` | `Switch[expr, pat1, val1, ..., default]` | Match: `Switch[2, 1, "a", 2, "b"]` → `"b"` |
+| `CompoundExpression` | `CompoundExpression[a, b, ..., c]` | Sequential: `CompoundExpression[1, 2, 3]` → `3` |
+| `Evaluate` | `Evaluate[expr]` | Force evaluation inside held expressions |
+| `ReleaseHold` | `ReleaseHold[expr]` | Unwrap Hold: `ReleaseHold[Hold[1+2]]` → `3` |
+| `Hold` | `Hold[expr]` | Prevent evaluation: `Hold[1+2]` → `Hold[1+2]` |
+| `HoldForm` | `HoldForm[expr]` | Prevent evaluation (display) |
+| `Do` | `Do[body, {i, n}]` | Loop: `Do[Print[i], {i, 1, 5}]` |
+| `While` | `While[test, body]` | Loop: `While[test, body]` → `Null` |
+| `For` | `For[start, test, incr, body]` | C-style: `For[Set[i,0], i<5, i++, body]` |
+| `Table` | `Table[expr, {i, n}]` | Collect: `Table[i^2, {i, 1, 5}]` → `{1,4,9,16,25}` |
+| `Nest` | `Nest[f, x, n]` | Apply n times: `Nest[f, x, 3]` → `f[f[f[x]]]` |
+| `NestList` | `NestList[f, x, n]` | With intermediates: `NestList[f, x, 2]` → `{x, f[x], f[f[x]]}` |
+| `Fold` | `Fold[f, x, list]` | Left fold: `Fold[Plus, 0, {1,2,3}]` → `6` |
+| `Map` | `Map[f, list]` | Apply: `Map[f, {1,2,3}]` → `{f[1], f[2], f[3]}` |
+| `Module` | `Module[{x=val}, body]` | Lexical scope: `Module[{x=10}, x+5]` → `15` |
+| `Block` | `Block[{x=val}, body]` | Dynamic scope (save/restore) |
+| `With` | `With[{x=val}, body]` | Constants: `With[{x=10}, x+5]` → `15` |
+
+### Predicates
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `TrueQ` | `TrueQ[expr]` | `TrueQ[True]` → `True`, `TrueQ[42]` → `False` |
+| `SameQ` | `SameQ[a, b]` | `SameQ[1, 1]` → `True`, `SameQ[a, b]` → `False` |
+| `UnsameQ` | `UnsameQ[a, b]` | Inverse of SameQ |
+| `NumericQ` | `NumericQ[expr]` | `NumericQ[42]` → `True`, `NumericQ["x"]` → `False` |
+| `AtomQ` | `AtomQ[expr]` | `AtomQ[42]` → `True`, `AtomQ[f[x]]` → `False` |
+| `HeadQ` | `HeadQ[expr, head]` | `HeadQ[{1,2}, List]` → `True` |
+| `ListQ` | `ListQ[expr]` | `ListQ[{1,2}]` → `True`, `ListQ[42]` → `False` |
+| `StringQ` | `StringQ[expr]` | `StringQ["hi"]` → `True`, `StringQ[42]` → `False` |
+| `IntegerQ` | `IntegerQ[expr]` | `IntegerQ[42]` → `True`, `IntegerQ[3.14]` → `False` |
+| `RealQ` | `RealQ[expr]` | `RealQ[3.14]` → `True`, `RealQ[42]` → `False` |
 
 ```python
 from minimatic.core import Symbol, Expression
 from minimatic.eval import evaluate, GlobalContext
-from minimatic.builtins import arithmetic  # Registers all arithmetic builtins
+from minimatic.builtins import arithmetic, control
 
 ctx = GlobalContext
 Plus, Times, Power = Symbol("Plus"), Symbol("Times"), Symbol("Power")
 
-evaluate(Expression(Plus, 1, 2, 3), ctx)       # 6
-evaluate(Expression(Times, 2, 3, 4), ctx)      # 24
-evaluate(Expression(Power, 2, 10), ctx)        # 1024
-evaluate(Expression(Plus, Expression(Times, 2, 3), 4), ctx)  # 10
+# Arithmetic
+evaluate(Expression(Plus, 1, 2, 3), ctx)                      # 6
+evaluate(Expression(Times, 2, 3, 4), ctx)                     # 24
+evaluate(Expression(Power, 2, 10), ctx)                       # 1024
+evaluate(Expression(Plus, Expression(Times, 2, 3), 4), ctx)   # 10
+
+# Control flow
+If = Symbol("If")
+evaluate(Expression(If, True, "yes", "no"), ctx)              # "yes"
+
+Table = Symbol("Table")
+i = Symbol("i")
+evaluate(Expression(Table,
+    Expression(Plus, i, 1),
+    Expression(Symbol("List"), i, 1, 5)
+), ctx)  # List[2, 3, 4, 5, 6]
+
+# Scoping
+Module = Symbol("Module")
+x = Symbol("x")
+evaluate(Expression(Module,
+    Expression(Symbol("List"), Expression(Symbol("Set"), x, 10)),
+    Expression(Plus, x, 5)
+), ctx)  # 15
 ```
 
 ---
@@ -261,7 +324,7 @@ evaluate(Expression(Plus, Expression(Times, 2, 3), 4), ctx)  # 10
 
 - **No parser** -- expressions are constructed programmatically via `Expression(head, *args)`
 - **No lexer/AST** -- the `.m` example files are not yet parsed by this engine
-- **Limited built-ins** -- only arithmetic; no list, string, or logic functions
+- **Limited built-ins** -- arithmetic and control flow only; no list manipulation, string, or logic functions
 - **No user-defined functions** -- `DownValues`/`UpValues` infrastructure exists but no syntactic sugar for defining them
 - **Performance** -- pure Python; no compilation or JIT
 
@@ -272,14 +335,36 @@ evaluate(Expression(Plus, Expression(Times, 2, 3), 4), ctx)  # 10
 ```python
 from minimatic.core import Symbol, Expression
 from minimatic.eval import evaluate, GlobalContext
-from minimatic.builtins import arithmetic
+from minimatic.builtins import arithmetic, control  # Registers all builtins
 
 ctx = GlobalContext
-Plus = Symbol("Plus")
+Plus, Times, Power = Symbol("Plus"), Symbol("Times"), Symbol("Power")
 
 # Build expressions programmatically
 expr = Expression(Plus, 1, 2, 3)
 print(evaluate(expr, ctx))  # 6
+
+# Control flow
+If = Symbol("If")
+print(evaluate(Expression(If, True, "yes", "no"), ctx))  # "yes"
+
+# Loops
+Table = Symbol("Table")
+i = Symbol("i")
+result = evaluate(Expression(Table,
+    Expression(Plus, Symbol("i"), 1),
+    Expression(Symbol("List"), i, 1, 5)
+), ctx)
+print(result)  # List[2, 3, 4, 5, 6]
+
+# Scoping
+Module = Symbol("Module")
+x = Symbol("x")
+result = evaluate(Expression(Module,
+    Expression(Symbol("List"), Expression(Symbol("Set"), x, 10)),
+    Expression(Plus, x, 5)
+), ctx)
+print(result)  # 15
 ```
 
 ---

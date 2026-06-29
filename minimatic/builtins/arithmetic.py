@@ -5,6 +5,7 @@ Implements Plus, Times, Power, and related operations following
 Wolfram Language semantics with proper attribute handling.
 """
 
+import cmath
 import math
 from typing import Any
 
@@ -291,7 +292,7 @@ def power_builtin(expr: Expression, context: EvaluationContext) -> Any:
             if isinstance(result, float) and result.is_integer():
                 return int(result)
             return result
-        except OverflowError, ZeroDivisionError:
+        except (OverflowError, ZeroDivisionError):
             return Expression(Power, base, exp)
 
     # Symbolic simplifications
@@ -469,10 +470,8 @@ def log_builtin(expr: Expression, context: EvaluationContext) -> Any:
         if is_number(arg):
             if is_real(arg) and arg > 0:
                 return math.log(arg)
-            # Complex or negative
-            return (
-                complex(arg).log() if hasattr(complex(arg), "log") else math.log(abs(arg), math.e)
-            )
+            # Complex or negative - use cmath for complex log
+            return cmath.log(complex(arg))
         return Expression(Log, arg)
 
     elif len(args) == 2:
@@ -534,11 +533,35 @@ def sum_builtin(expr: Expression, context: EvaluationContext) -> Any:
             imax = evaluate(iter_args[1], context)
             if is_integer(imax) and imax > 0:
                 for i in range(1, imax + 1):
-                    # Substitute and evaluate
                     from minimatic.pattern import replace_with_bindings
 
                     substituted = replace_with_bindings(summand, {var: i})
                     result += evaluate(substituted, context)
+                return result
+        elif len(iter_args) == 3:
+            # {i, imin, imax} form
+            imin = evaluate(iter_args[1], context)
+            imax = evaluate(iter_args[2], context)
+            if is_integer(imin) and is_integer(imax):
+                for i in range(imin, imax + 1):
+                    from minimatic.pattern import replace_with_bindings
+
+                    substituted = replace_with_bindings(summand, {var: i})
+                    result += evaluate(substituted, context)
+                return result
+        elif len(iter_args) == 4:
+            # {i, imin, imax, step} form
+            imin = evaluate(iter_args[1], context)
+            imax = evaluate(iter_args[2], context)
+            step = evaluate(iter_args[3], context)
+            if is_integer(imin) and is_integer(imax) and is_integer(step) and step != 0:
+                i = imin
+                while (step > 0 and i <= imax) or (step < 0 and i >= imax):
+                    from minimatic.pattern import replace_with_bindings
+
+                    substituted = replace_with_bindings(summand, {var: i})
+                    result += evaluate(substituted, context)
+                    i += step
                 return result
 
     # Return unevaluated if we can't compute
@@ -583,6 +606,31 @@ def product_builtin(expr: Expression, context: EvaluationContext) -> Any:
 
                     substituted = replace_with_bindings(factor, {var: i})
                     result *= evaluate(substituted, context)
+                return result
+        elif len(iter_args) == 3:
+            # {i, imin, imax} form
+            imin = evaluate(iter_args[1], context)
+            imax = evaluate(iter_args[2], context)
+            if is_integer(imin) and is_integer(imax):
+                for i in range(imin, imax + 1):
+                    from minimatic.pattern import replace_with_bindings
+
+                    substituted = replace_with_bindings(factor, {var: i})
+                    result *= evaluate(substituted, context)
+                return result
+        elif len(iter_args) == 4:
+            # {i, imin, imax, step} form
+            imin = evaluate(iter_args[1], context)
+            imax = evaluate(iter_args[2], context)
+            step = evaluate(iter_args[3], context)
+            if is_integer(imin) and is_integer(imax) and is_integer(step) and step != 0:
+                i = imin
+                while (step > 0 and i <= imax) or (step < 0 and i >= imax):
+                    from minimatic.pattern import replace_with_bindings
+
+                    substituted = replace_with_bindings(factor, {var: i})
+                    result *= evaluate(substituted, context)
+                    i += step
                 return result
 
     return Expression(Product, factor, *iterators)
