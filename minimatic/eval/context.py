@@ -32,14 +32,8 @@ class EvaluationContext:
         # Symbol -> frozenset[Attribute]
         self._attributes: dict[Symbol, frozenset[Symbol]] = {}
 
-        # Value storage by type
-        self._own_values: dict[Symbol, list] = {}
-        self._down_values: dict[Symbol, list] = {}
-        self._up_values: dict[Symbol, list] = {}
-        self._sub_values: dict[Symbol, list] = {}
-        self._n_values: dict[Symbol, list] = {}
-        self._default_values: dict[Symbol, Any] = {}
-        self._format_values: dict[Symbol, list] = {}
+        # Consolidated value storage: Symbol -> {type_key: value}
+        self._values: dict[Symbol, dict[str, Any]] = {}
 
     def get_symbol(self, name: str) -> Symbol | None:
         """Get symbol by name, checking parent contexts if not found."""
@@ -77,61 +71,76 @@ class EvaluationContext:
 
     # Value storage accessors
 
+    def _get_value_list(self, sym: Symbol, key: str) -> list:
+        """Get a value list for a symbol and key, checking parent contexts."""
+        sym_vals = self._values.get(sym)
+        if sym_vals is not None and key in sym_vals:
+            return sym_vals[key]
+        if self.parent is not None:
+            return self.parent._get_value_list(sym, key)
+        return []
+
+    def _get_value_scalar(self, sym: Symbol, key: str) -> Any:
+        """Get a scalar value for a symbol and key, checking parent contexts."""
+        sym_vals = self._values.get(sym)
+        if sym_vals is not None and key in sym_vals:
+            return sym_vals[key]
+        if self.parent is not None:
+            return self.parent._get_value_scalar(sym, key)
+        return None
+
+    def _set_value(self, sym: Symbol, key: str, value: Any) -> None:
+        """Set a value for a symbol and key."""
+        if sym not in self._values:
+            self._values[sym] = {}
+        self._values[sym][key] = value
+
     def get_own_values(self, sym: Symbol) -> list:
-        return self._own_values.get(sym, [])
+        return self._get_value_list(sym, "own")
 
     def set_own_values(self, sym: Symbol, values: list) -> None:
-        self._own_values[sym] = values
+        self._set_value(sym, "own", values)
 
     def get_down_values(self, sym: Symbol) -> list:
-        return self._down_values.get(sym, [])
+        return self._get_value_list(sym, "down")
 
     def set_down_values(self, sym: Symbol, values: list) -> None:
-        self._down_values[sym] = values
+        self._set_value(sym, "down", values)
 
     def get_up_values(self, sym: Symbol) -> list:
-        return self._up_values.get(sym, [])
+        return self._get_value_list(sym, "up")
 
     def set_up_values(self, sym: Symbol, values: list) -> None:
-        self._up_values[sym] = values
+        self._set_value(sym, "up", values)
 
     def get_sub_values(self, sym: Symbol) -> list:
-        return self._sub_values.get(sym, [])
+        return self._get_value_list(sym, "sub")
 
     def set_sub_values(self, sym: Symbol, values: list) -> None:
-        self._sub_values[sym] = values
+        self._set_value(sym, "sub", values)
 
     def get_n_values(self, sym: Symbol) -> list:
-        return self._n_values.get(sym, [])
+        return self._get_value_list(sym, "n")
 
     def set_n_values(self, sym: Symbol, values: list) -> None:
-        self._n_values[sym] = values
+        self._set_value(sym, "n", values)
 
     def get_default_value(self, sym: Symbol) -> Any:
-        return self._default_values.get(sym, None)
+        return self._get_value_scalar(sym, "default")
 
     def set_default_value(self, sym: Symbol, value: Any) -> None:
-        self._default_values[sym] = value
+        self._set_value(sym, "default", value)
 
     def get_format_values(self, sym: Symbol) -> list:
-        return self._format_values.get(sym, [])
+        return self._get_value_list(sym, "format")
 
     def set_format_values(self, sym: Symbol, values: list) -> None:
-        self._format_values[sym] = values
+        self._set_value(sym, "format", values)
 
     def clear_all_values(self, sym: Symbol) -> None:
         """Clear all values for a symbol."""
-        for store in [
-            self._own_values,
-            self._down_values,
-            self._up_values,
-            self._sub_values,
-            self._n_values,
-            self._default_values,
-            self._format_values,
-        ]:
-            if sym in store:
-                del store[sym]
+        if sym in self._values:
+            del self._values[sym]
 
     def __repr__(self) -> str:
         return f"EvaluationContext({self.name!r})"

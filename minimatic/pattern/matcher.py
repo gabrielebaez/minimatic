@@ -382,15 +382,9 @@ def _match_impl(
         return success(bindings)
 
     # ─────────────────────────────────────────────────────────────────────────
-    # Handle atoms - must be equal
+    # Handle atoms and symbols - must be equal
     # ─────────────────────────────────────────────────────────────────────────
-    if is_atom(pattern):
-        return success(bindings) if pattern == expr else NO_MATCH
-
-    # ─────────────────────────────────────────────────────────────────────────
-    # Handle symbols - must be equal
-    # ─────────────────────────────────────────────────────────────────────────
-    if is_symbol(pattern):
+    if is_atom(pattern) or is_symbol(pattern):
         return success(bindings) if pattern == expr else NO_MATCH
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -610,60 +604,17 @@ def _match_sequence_impl(
         return
 
     # ─────────────────────────────────────────────────────────────────────────
-    # Handle Repeated in sequence position (pat..)
+    # Handle Repeated (pat..) and RepeatedNull (pat...) in sequence position
     # ─────────────────────────────────────────────────────────────────────────
-    if is_repeated(pat):
+    if is_repeated(pat) or is_repeated_null(pat):
         inner = pat.args[0] if len(pat.args) >= 1 else None
         if inner is None:
             return
 
+        min_count = 0 if is_repeated_null(pat) else 1
         min_needed_rest = _min_exprs_for_patterns(rest_patterns)
 
-        # Try matching 1 to N expressions
-        for match_count in range(1, len(exprs) - min_needed_rest + 1):
-            matched_exprs = exprs[:match_count]
-            remaining_exprs = exprs[match_count:]
-
-            # Try to match all matched_exprs against inner pattern.
-            # Each element must match; accumulate bindings.
-            all_ok = True
-            new_bindings = bindings
-            for e in matched_exprs:
-                result = _match_impl(
-                    inner, e, new_bindings, evaluator, max_depth, depth + 1, expr_attrs
-                )
-                if not result.success:
-                    all_ok = False
-                    break
-                new_bindings = result.bindings
-
-            if all_ok:
-                yield from _match_sequence_impl(
-                    rest_patterns,
-                    remaining_exprs,
-                    new_bindings,
-                    evaluator,
-                    flat,
-                    orderless,
-                    max_depth,
-                    depth + 1,
-                    expr_attrs,
-                )
-        return
-
-    # ─────────────────────────────────────────────────────────────────────────
-    # Handle RepeatedNull in sequence position (pat...)
-    # Zero or more repetitions
-    # ─────────────────────────────────────────────────────────────────────────
-    if is_repeated_null(pat):
-        inner = pat.args[0] if len(pat.args) >= 1 else None
-        if inner is None:
-            return
-
-        min_needed_rest = _min_exprs_for_patterns(rest_patterns)
-
-        # Try matching 0 to N expressions
-        for match_count in range(0, len(exprs) - min_needed_rest + 1):
+        for match_count in range(min_count, len(exprs) - min_needed_rest + 1):
             matched_exprs = exprs[:match_count]
             remaining_exprs = exprs[match_count:]
 

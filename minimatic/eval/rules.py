@@ -140,7 +140,6 @@ def try_rules(rules: list[Rule], expr: Any, context: Any = None) -> Any:
     Returns:
         Transformed expression if a rule matched, otherwise original expression.
     """
-    # Sort by priority (highest first), maintaining stable order for equal priorities
     sorted_rules = sorted(rules, key=lambda r: -r.priority)
 
     for rule in sorted_rules:

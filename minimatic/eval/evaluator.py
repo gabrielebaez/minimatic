@@ -29,6 +29,7 @@ from .transforms import apply_flat, apply_listable, apply_orderless, flatten_seq
 
 # Lazy import to avoid circular dependency
 _builtin_dispatch = None
+_builtin_attributes = None
 
 
 def _get_builtin_dispatch():
@@ -39,6 +40,16 @@ def _get_builtin_dispatch():
 
         _builtin_dispatch = dispatch_builtin
     return _builtin_dispatch
+
+
+def _get_builtin_attributes():
+    """Lazy import of built-in attributes function."""
+    global _builtin_attributes
+    if _builtin_attributes is None:
+        from minimatic.builtins.registry import builtin_attributes
+
+        _builtin_attributes = builtin_attributes
+    return _builtin_attributes
 
 
 # System constants
@@ -162,7 +173,7 @@ def _evaluate_expression(expr: Expression, context: EvaluationContext) -> Any:
         # Evaluate head
         if is_symbol(head):
             # Check OwnValues for head
-            head = _evaluate_symbol_head(head, context)
+            head = _evaluate_symbol(head, context)
         elif is_expr(head):
             head = evaluate(head, context)
 
@@ -238,8 +249,7 @@ def _resolve_attributes(expr: Expression, context: EvaluationContext) -> frozens
         head_attrs = context.get_attributes(expr.head)
 
     # Also check built-in registered attributes
-    from minimatic.builtins.registry import builtin_attributes
-
+    builtin_attributes = _get_builtin_attributes()
     builtin_attrs = builtin_attributes(expr.head) if is_symbol(expr.head) else frozenset()
 
     # Combine: head_ctx_attrs ∪ builtin_attrs ∪ expr_attrs
@@ -284,21 +294,6 @@ def _evaluate_arguments(
     else:
         # Evaluate all arguments
         return [evaluate(arg, context) for arg in expr.args]
-
-
-def _evaluate_symbol_head(head: Symbol, context: EvaluationContext) -> Any:
-    """Evaluate a symbol that appears as a head."""
-    own_values = context.get_own_values(head)
-
-    if not own_values:
-        return head
-
-    for pattern_expr, replacement, condition in own_values:
-        result, success = _try_definition(pattern_expr, replacement, condition, head, context)
-        if success:
-            return evaluate(result, context)
-
-    return head
 
 
 def _apply_rules(expr: Expression, context: EvaluationContext) -> Any:
@@ -408,7 +403,7 @@ def try_evaluate(
     """
     try:
         return evaluate(expr, context)
-    except RecursionLimitError, IterationLimitError:
+    except (RecursionLimitError, IterationLimitError):
         return default
 
 

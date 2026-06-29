@@ -36,16 +36,6 @@ def is_complex(x: Any) -> bool:
     return isinstance(x, complex)
 
 
-def flatten_associative(args: list[Any], identity: Any) -> list[Any]:
-    """Flatten nested associative operations (for Flat attribute)."""
-    result = []
-    for arg in args:
-        if arg == identity:
-            continue
-        result.append(arg)
-    return result
-
-
 def numeric_plus(args: list[Any]) -> Any:
     """Compute numeric sum of arguments."""
     total = 0
