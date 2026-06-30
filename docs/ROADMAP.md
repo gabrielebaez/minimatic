@@ -178,166 +178,7 @@ Enabling higher-order and functional programming patterns.
 
 ---
 
-## Phase 4 — Numeric & Math
-
-### 4.1 — Trigonometric & Hyperbolic
-
-| Builtin | Description |
-|---------|-------------|
-| `Sin`, `Cos`, `Tan` | Trigonometric functions |
-| `ArcSin`, `ArcCos`, `ArcTan` | Inverse trig |
-| `Sinh`, `Cosh`, `Tanh` | Hyperbolic functions |
-| `ArcSinh`, `ArcCosh`, `ArcTanh` | Inverse hyperbolic |
-
-### 4.2 — Numeric Utilities
-
-| Builtin | Signature | Description |
-|---------|-----------|-------------|
-| `Max` | `Max[a, b, ...]` | Maximum of arguments |
-| `Min` | `Min[a, b, ...]` | Minimum of arguments |
-| `Mod` | `Mod[a, b]` | Modulo: `Mod[7, 3]` → `1` |
-| `Quotient` | `Quotient[a, b]` | Integer division |
-| `Floor` | `Floor[x]` | `Floor[3.7]` → `3` |
-| `Ceiling` | `Ceiling[x]` | `Ceiling[3.2]` → `4` |
-| `Round` | `Round[x]` | `Round[3.5]` → `4` |
-| `Sign` | `Sign[x]` | `Sign[-5]` → `-1` |
-| `Chop` | `Chop[expr]` | Round near-zero to zero |
-| `N` | `N[expr]` or `N[expr, digits]` | Numeric approximation |
-
-### 4.3 — Integer & Number Theory
-
-| Builtin | Signature | Description |
-|---------|-----------|-------------|
-| `Factorial` | `Factorial[n]` or `n!` | `5!` → `120` |
-| `GCD` | `GCD[a, b]` | Greatest common divisor |
-| `LCM` | `LCM[a, b]` | Least common multiple |
-| `PrimeQ` | `PrimeQ[n]` | Is prime? |
-| `Divisors` | `Divisors[n]` | All divisors |
-| `Prime` | `Prime[n]` | nth prime |
-
-### 4.4 — Constants & Random
-
-| Builtin | Description |
-|---------|-------------|
-| `Pi` | π (symbolic constant) |
-| `E` | Euler's number |
-| `Degree` | π/180 |
-| `GoldenRatio` | (1+√5)/2 |
-| `I` | Imaginary unit |
-| `RandomReal` | Random real in [0,1) |
-| `RandomInteger` | Random integer in range |
-| `SeedRandom` | Seed the PRNG |
-
----
-
-## Phase 5 — Expression Manipulation & Metaprogramming
-
-### 5.1 — Structure Inspection
-
-| Builtin | Signature | Description |
-|---------|-----------|-------------|
-| `FullForm` | `FullForm[expr]` | Canonical representation |
-| `InputForm` | `InputForm[expr]` | Input-compatible form |
-| `TreeForm` | `TreeForm[expr]` | Tree visualization |
-| `ByteCount` | `ByteCount[expr]` | Memory usage |
-
-### 5.2 — Transformation
-
-| Builtin | Signature | Description |
-|---------|-----------|-------------|
-| `MapAll` | `MapAll[f, expr]` | Map at all levels |
-| `ReplaceList` | `ReplaceList[expr, rule]` | All possible replacements |
-| `ReplaceRepeated` | `ReplaceRepeated[expr, rules]` | Apply until stable (`//.`) |
-| `Operate` | `Operate[p, expr]` | Apply operator to head |
-| `Level` | `Level[expr, n]` | Extract at level n |
-| `Cases` | `Cases[expr, pattern]` | Extract matching subexpressions |
-| `DeleteCases` | `DeleteCases[expr, pattern]` | Remove matching subexpressions |
-| `Extract` | `Extract[expr, pos]` | Extract at position |
-| `HoldComplete` | `HoldComplete[expr]` | Prevent all evaluation |
-
-### 5.3 — Symbol Management
-
-| Builtin | Signature | Description |
-|---------|-----------|-------------|
-| `Clear` | `Clear[sym]` | Remove all values from symbol |
-| `ClearAll` | `ClearAll[sym]` | Clear values and attributes |
-| `Attributes` | `Attributes[sym]` | Get attributes |
-| `SetAttributes` | `SetAttributes[sym, attr]` | Set attributes |
-| `OwnValues` | `OwnValues[sym]` | Get own values |
-| `DownValues` | `DownValues[sym]` | Get down values |
-| `UpValues` | `UpValues[sym]` | Get up values |
-| `Definition` | `Definition[sym]` | Show all definitions |
-| `Information` | `Information[sym]` | Show info |
-| `Names` | `Names["pattern"]` | List matching symbols |
-| `Context` | `Context[sym]` | Get symbol context |
-
----
-
-## Phase 6 — Error Handling & Control Flow Extensions
-
-### 6.1 — Exception-like Control
-
-| Builtin | Signature | Description |
-|---------|-----------|-------------|
-| `Catch` | `Catch[expr]` | Catch thrown values |
-| `Throw` | `Throw[val]` | Throw a value |
-| `Return` | `Return[val]` | Early return from function |
-| `Break` | `Break[]` | Break from loop |
-| `Continue` | `Continue[]` | Continue to next iteration |
-| `Check` | `Check[expr, failexpr]` | Handle messages |
-| `Abort` | `Abort[]` | Abort evaluation |
-| `AbortProtect` | `AbortProtect[expr]` | Evaluate despite abort |
-| `TimeConstrained` | `TimeConstrained[expr, t]` | Time limit |
-| `MemoryConstrained` | `MemoryConstrained[expr, n]` | Memory limit |
-| `Once` | `Once[expr]` | Evaluate once, cache result |
-
-### 6.2 — Messages
-
-| Builtin | Description |
-|---------|-------------|
-| `Message` | Generate a message |
-| `Messages` | Get messages for a symbol |
-| `MessageName` | `General::usage` style names |
-| `$MessageList` | Recent messages |
-| `$Messages` | Message stream |
-
----
-
-## Phase 7 — File I/O & System
-
-### 7.1 — File Operations
-
-| Builtin | Signature | Description |
-|---------|-----------|-------------|
-| `Get` | `Get["file.m"]` | Read and evaluate file |
-| `Put` | `Put[expr, "file.m"]` | Write expression to file |
-| `Import` | `Import["file.ext"]` | Import data |
-| `Export` | `Export["file.ext", data]` | Export data |
-| `OpenRead` | `OpenRead["file"]` | Open for reading |
-| `OpenWrite` | `OpenWrite["file"]` | Open for writing |
-| `Close` | `Close[stream]` | Close stream |
-| `Read` | `Read[stream]` | Read from stream |
-| `Write` | `Write[stream, expr]` | Write to stream |
-| `Print` | `Print[expr]` | Print to stdout |
-| `Input` | `Input["prompt"]` | Read from stdin |
-
-### 7.2 — System Functions
-
-| Builtin | Description |
-|---------|-------------|
-| `$Version` | Minimatic version |
-| `$OperatingSystem` | OS name |
-| `$MachineName` | Machine hostname |
-| `$UserName` | Current user |
-| `DateString` | Current date/time |
-| `AbsoluteTime` | Unix timestamp |
-| `Pause` | Sleep for n seconds |
-| `Run` | Run shell command |
-| `RunProcess` | Run and capture output |
-
----
-
-## Phase 8 — Parsing & Syntax
+## Phase 4 — Parsing & Syntax
 
 A lexer and parser for `.mm` syntax:
 
@@ -364,6 +205,140 @@ Expression(Plus, 1, 2)
 
 ---
 
+## Phase 5 — Numeric & Math
+
+### 5.1 — Trigonometric & Hyperbolic
+
+| Builtin | Description |
+|---------|-------------|
+| `Sin`, `Cos`, `Tan` | Trigonometric functions |
+
+### 5.2 — Numeric Utilities
+
+| Builtin | Signature | Description |
+|---------|-----------|-------------|
+| `Max` | `Max[a, b, ...]` | Maximum of arguments |
+| `Min` | `Min[a, b, ...]` | Minimum of arguments |
+| `Mod` | `Mod[a, b]` | Modulo: `Mod[7, 3]` → `1` |
+| `Quotient` | `Quotient[a, b]` | Integer division |
+| `Floor` | `Floor[x]` | `Floor[3.7]` → `3` |
+| `Ceiling` | `Ceiling[x]` | `Ceiling[3.2]` → `4` |
+| `Round` | `Round[x]` | `Round[3.5]` → `4` |
+| `Sign` | `Sign[x]` | `Sign[-5]` → `-1` |
+| `Chop` | `Chop[expr]` | Round near-zero to zero |
+| `N` | `N[expr]` or `N[expr, digits]` | Numeric approximation |
+
+### 5.3 — Constants & Random
+
+| Builtin | Description |
+|---------|-------------|
+| `Pi` | π (symbolic constant) |
+| `E` | Euler's number |
+| `Degree` | π/180 |
+| `GoldenRatio` | (1+√5)/2 |
+| `I` | Imaginary unit |
+| `RandomReal` | Random real in [0,1) |
+| `RandomInteger` | Random integer in range |
+| `SeedRandom` | Seed the PRNG |
+
+---
+
+## Phase 6 — Expression Manipulation & Metaprogramming
+
+### 6.1 — Structure Inspection
+
+| Builtin | Signature | Description |
+|---------|-----------|-------------|
+| `FullForm` | `FullForm[expr]` | Canonical representation |
+| `InputForm` | `InputForm[expr]` | Input-compatible form |
+| `TreeForm` | `TreeForm[expr]` | Tree visualization |
+| `ByteCount` | `ByteCount[expr]` | Memory usage |
+
+### 6.2 — Transformation
+
+| Builtin | Signature | Description |
+|---------|-----------|-------------|
+| `MapAll` | `MapAll[f, expr]` | Map at all levels |
+| `ReplaceList` | `ReplaceList[expr, rule]` | All possible replacements |
+| `ReplaceRepeated` | `ReplaceRepeated[expr, rules]` | Apply until stable (`//.`) |
+| `Operate` | `Operate[p, expr]` | Apply operator to head |
+| `Level` | `Level[expr, n]` | Extract at level n |
+| `Cases` | `Cases[expr, pattern]` | Extract matching subexpressions |
+| `DeleteCases` | `DeleteCases[expr, pattern]` | Remove matching subexpressions |
+| `Extract` | `Extract[expr, pos]` | Extract at position |
+| `HoldComplete` | `HoldComplete[expr]` | Prevent all evaluation |
+
+### 6.3 — Symbol Management
+
+| Builtin | Signature | Description |
+|---------|-----------|-------------|
+| `Clear` | `Clear[sym]` | Remove all values from symbol |
+| `ClearAll` | `ClearAll[sym]` | Clear values and attributes |
+| `Attributes` | `Attributes[sym]` | Get attributes |
+| `SetAttributes` | `SetAttributes[sym, attr]` | Set attributes |
+| `OwnValues` | `OwnValues[sym]` | Get own values |
+| `DownValues` | `DownValues[sym]` | Get down values |
+| `UpValues` | `UpValues[sym]` | Get up values |
+| `Definition` | `Definition[sym]` | Show all definitions |
+| `Information` | `Information[sym]` | Show info |
+| `Names` | `Names["pattern"]` | List matching symbols |
+| `Context` | `Context[sym]` | Get symbol context |
+
+---
+
+## Phase 7 — Error Handling & Control Flow Extensions
+
+### 7.1 — Exception-like Control
+
+| Builtin | Signature | Description |
+|---------|-----------|-------------|
+| `Catch` | `Catch[expr]` | Catch thrown values |
+| `Throw` | `Throw[val]` | Throw a value |
+| `Return` | `Return[val]` | Early return from function |
+| `Break` | `Break[]` | Break from loop |
+| `Continue` | `Continue[]` | Continue to next iteration |
+| `Check` | `Check[expr, failexpr]` | Handle messages |
+| `Abort` | `Abort[]` | Abort evaluation |
+| `AbortProtect` | `AbortProtect[expr]` | Evaluate despite abort |
+| `TimeConstrained` | `TimeConstrained[expr, t]` | Time limit |
+| `MemoryConstrained` | `MemoryConstrained[expr, n]` | Memory limit |
+| `Once` | `Once[expr]` | Evaluate once, cache result |
+
+---
+
+## Phase 8 — File I/O & System
+
+### 8.1 — File Operations
+
+| Builtin | Signature | Description |
+|---------|-----------|-------------|
+| `Get` | `Get["file.m"]` | Read and evaluate file |
+| `Put` | `Put[expr, "file.m"]` | Write expression to file |
+| `Import` | `Import["file.ext"]` | Import data |
+| `Export` | `Export["file.ext", data]` | Export data |
+| `OpenRead` | `OpenRead["file"]` | Open for reading |
+| `OpenWrite` | `OpenWrite["file"]` | Open for writing |
+| `Close` | `Close[stream]` | Close stream |
+| `Read` | `Read[stream]` | Read from stream |
+| `Write` | `Write[stream, expr]` | Write to stream |
+| `Print` | `Print[expr]` | Print to stdout |
+| `Input` | `Input["prompt"]` | Read from stdin |
+
+### 8.2 — System Functions
+
+| Builtin | Description |
+|---------|-------------|
+| `$Version` | Minimatic version |
+| `$OperatingSystem` | OS name |
+| `$MachineName` | Machine hostname |
+| `DateString` | Current date/time |
+| `AbsoluteTime` | Unix timestamp |
+| `Pause` | Sleep for n seconds |
+| `Run` | Run shell command |
+| `RunProcess` | Run and capture output |
+
+---
+
 ## Phase 9 — Performance & Polish
 
 | Feature | Description |
@@ -386,9 +361,9 @@ Expression(Plus, 1, 2)
 | **v0.1.0 — Usable** | Conditional logic, list processing, basic programs |
 | **v0.2.0 — Functional** | Higher-order programming, pure functions |
 | **v0.3.0 — Text** | String processing, serialization |
-| **v0.4.0 — Math** | Scientific computing, numeric algorithms |
-| **v0.5.0 — Meta** | Metaprogramming, code generation |
-| **v0.6.0 — Robust** | Error handling, resource management |
-| **v0.7.0 — System** | File I/O, system integration |
-| **v0.8.0 — Language** | Parser, syntax |
+| **v0.4.0 — Language** | Parser, syntax |
+| **v0.5.0 — Math** | numeric algorithms |
+| **v0.6.0 — Meta** | Metaprogramming, code generation |
+| **v0.7.0 — Robust** | Error handling, resource management |
+| **v0.8.0 — System** | File I/O, system integration |
 | **v0.9.0 — Complete** | performance, polish |
