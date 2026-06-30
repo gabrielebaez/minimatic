@@ -7,12 +7,11 @@
 Minimatic is a minimal, self-contained implementation of a Wolfram Language-style symbolic computation engine in Python. The design prioritizes:
 
 - **Immutability** — all core types are immutable value objects
-- **Correctness** — faithful implementation of the standard evaluation procedure
 - **Minimalism** — no external dependencies; pure Python
 - **Extensibility** — builtins are registered externally, not wired into core types
 - **Thread safety** — evaluation state is per-thread; no global mutable state beyond registration
 
-Non-goals: parser/lexer, JIT compilation, numerical performance, full Wolfram Language compatibility.
+Non-goals: numerical performance, full Wolfram Language compatibility.
 
 ---
 
@@ -462,33 +461,7 @@ minimatic/
 
 ---
 
-## 11. Future Directions
-
-### 11.1 Near-term
-
-- **User-defined functions**: Syntactic sugar for `DownValues`/`UpValues` registration
-- **Additional builtins**: `Map`, `Apply`, `Thread`, `Join`, `Select`, `Cases`, `Replace`
-- **Simplify/Expand**: Algebraic transformation builtins
-- **NValues**: Numeric approximation infrastructure (`N[expr, prec]`)
-
-### 11.2 Medium-term
-
-- **Parser**: Wolfram Language syntax → Expression trees
-- **Package system**: Module loading, namespaced symbols
-- **Formatting**: `FormatValues` for custom display (boxes, typesetting)
-- **Compile**: Expression → Python function compilation for performance
-
-### 11.3 Design Considerations for Future Work
-
-- **New builtins**: Use `@register_builtin` — never modify Expression class for head-specific operations
-- **New structural operations**: Consider adding as Expression methods if universally applicable
-- **New pattern types**: Add head symbol + matcher case (patterns are expressions, so infrastructure scales)
-- **New attributes**: Add Symbol to `attributes.py` + evaluator case in step 6-8
-- **New value types**: Add storage to `EvaluationContext` + dispatch case in `_apply_rules`
-
----
-
-## 12. Testing Strategy
+## 11. Testing Strategy
 
 Tests are organized to mirror the source structure:
 

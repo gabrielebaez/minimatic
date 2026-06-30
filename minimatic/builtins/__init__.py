@@ -19,14 +19,27 @@ from .arithmetic import (
     Sum,
     Times,
 )
+from .comparison import (
+    And,
+    Equal,
+    EvenQ,
+    Greater,
+    GreaterEqual,
+    Less,
+    LessEqual,
+    Not,
+    OddQ,
+    Or,
+    Unequal,
+)
 from .control import (
     AtomQ,
     Block,
     CompoundExpression,
     Do,
     Evaluate,
-    For,
     Fold,
+    For,
     HeadQ,
     Hold,
     HoldForm,
@@ -52,6 +65,7 @@ from .control import (
     While,
     With,
 )
+from .io import Request
 from .registry import (
     BuiltinFunction,
     BuiltinRegistry,
@@ -61,7 +75,6 @@ from .registry import (
     has_builtin,
     register_builtin,
 )
-from .io import Request
 
 __all__ = [
     # Registry
@@ -85,6 +98,20 @@ __all__ = [
     "Log",
     "Sum",
     "Product",
+    # Comparison
+    "Less",
+    "Greater",
+    "LessEqual",
+    "GreaterEqual",
+    "Equal",
+    "Unequal",
+    # Logic
+    "And",
+    "Or",
+    "Not",
+    # Parity predicates
+    "EvenQ",
+    "OddQ",
     # Control flow
     "If",
     "Which",

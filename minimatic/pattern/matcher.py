@@ -728,20 +728,23 @@ def _min_exprs_for_patterns(patterns: tuple) -> int:
 def replace_with_bindings(
     expr: Element,
     bindings: Bindings,
+    flatten_lists: bool = True,
 ) -> Element:
     """
     Substitute bound values into an expression.
 
     Replaces all occurrences of bound symbols with their values.
-    Bound sequences (List[...]) are flattened into argument lists.
+    When flatten_lists is True (default), bound sequences (List[...])
+    are flattened into argument lists — needed for pattern matching.
+    Set flatten_lists=False for simple symbol substitution (e.g., Module).
     """
     if not bindings:
         return expr
 
-    return _replace_impl(expr, bindings)
+    return _replace_impl(expr, bindings, flatten_lists)
 
 
-def _replace_impl(expr: Element, bindings: Bindings) -> Element:
+def _replace_impl(expr: Element, bindings: Bindings, flatten_lists: bool = True) -> Element:
     """Internal implementation of substitution."""
 
     # Check if this is a bound symbol
@@ -754,17 +757,20 @@ def _replace_impl(expr: Element, bindings: Bindings) -> Element:
 
     # Recursively process expressions
     if is_expr(expr):
-        new_head = _replace_impl(expr.head, bindings)
-        new_args = tuple(_replace_impl(arg, bindings) for arg in expr.args)
+        new_head = _replace_impl(expr.head, bindings, flatten_lists)
+        new_args = tuple(_replace_impl(arg, bindings, flatten_lists) for arg in expr.args)
 
-        # Flatten List-bound sequences in arguments
-        flattened_args: list[Element] = []
-        for arg in new_args:
-            if is_expr(arg) and arg.head == Symbol("List"):
-                # Flatten List[...] into argument list
-                flattened_args.extend(arg.args)
-            else:
-                flattened_args.append(arg)
+        if flatten_lists:
+            # Flatten List-bound sequences in arguments
+            flattened_args: list[Element] = []
+            for arg in new_args:
+                if is_expr(arg) and arg.head == Symbol("List"):
+                    # Flatten List[...] into argument list
+                    flattened_args.extend(arg.args)
+                else:
+                    flattened_args.append(arg)
+        else:
+            flattened_args = list(new_args)
 
         # Only create new expression if something changed
         if new_head == expr.head and tuple(flattened_args) == expr.args:

@@ -550,7 +550,7 @@ def module_builtin(expr: Expression, context: EvaluationContext) -> Any:
                 bindings[item.args[0]] = local_sym
 
     # Substitute and evaluate body
-    substituted = replace_with_bindings(body, bindings)
+    substituted = replace_with_bindings(body, bindings, flatten_lists=False)
     return evaluate(substituted, context)
 
 
@@ -635,7 +635,7 @@ def with_builtin(expr: Expression, context: EvaluationContext) -> Any:
                 bindings[item.args[0]] = evaluate(item.args[1], context)
 
     # Substitute into body and evaluate
-    substituted = replace_with_bindings(body, bindings)
+    substituted = replace_with_bindings(body, bindings, flatten_lists=False)
     return evaluate(substituted, context)
 
 

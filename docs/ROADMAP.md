@@ -1,8 +1,8 @@
 # Minimatic Roadmap
 
 > **Status: v0.1.0 — Foundation**
-> The symbolic engine, pattern matcher, and evaluation loop are complete and tested (496 tests passing).
-> Arithmetic and control flow builtins are implemented. The system needs comparison, logic, list, and string builtins to become usable for real programs.
+> The symbolic engine, pattern matcher, and evaluation loop are complete and tested (579 tests passing).
+> Arithmetic, control flow, comparison, and logic builtins are implemented. The system needs list and string builtins to become usable for real programs.
 
 ---
 
@@ -29,7 +29,7 @@ The core symbolic computation engine is complete.
 
 Making minimatic usable for basic programs. **In progress.**
 
-### 1.1 — Comparison & Logic Builtins
+### 1.1 — Comparison & Logic Builtins ✅
 
 | Builtin | Signature | Description |
 |---------|-----------|-------------|
@@ -74,7 +74,28 @@ Making minimatic usable for basic programs. **In progress.**
 | `MapIndexed` | `MapIndexed[f, list]` | `MapIndexed[f, {a,b}]` → `{f[a,1], f[b,2]}` |
 | `MapThread` | `MapThread[f, {list1, list2}]` | `MapThread[f, {{1,2},{3,4}}]` → `{f[1,3], f[2,4]}` |
 
-### 1.3 — Expression Inspection Builtins
+### 1.3 — Associations & Structured Data
+
+| Builtin | Signature | Description |
+|---------|-----------|-------------|
+| `Association` | `Association[k1->v1, ...]` | Create association |
+| `Key` | `Key["name"]` | Key accessor |
+| `Keys` | `Keys[assoc]` | List keys |
+| `Values` | `Values[assoc]` | List values |
+| `Lookup` | `Lookup[assoc, key]` | Safe key access |
+| `KeyExistsQ` | `KeyExistsQ[assoc, key]` | Key exists? |
+| `KeyTake` | `KeyTake[assoc, keys]` | Extract keys |
+| `KeyDrop` | `KeyDrop[assoc, keys]` | Remove keys |
+| `KeySort` | `KeySort[assoc]` | Sort by key |
+| `KeySelect` | `KeySelect[assoc, test]` | Filter by key |
+| `Merge` | `Merge[assoc1, assoc2]` | Merge associations |
+| `GroupBy` | `GroupBy[list, f]` | Group elements |
+| `Counts` | `Counts[list]` | Element counts |
+| `Tally` | `Tally[list]` | Element tallies |
+| `Gather` | `Gather[list, test]` | Group by equality |
+| `GatherBy` | `GatherBy[list, f]` | Group by function |
+
+### 1.4 — Expression Inspection Builtins
 
 | Builtin | Signature | Description |
 |---------|-----------|-------------|
@@ -282,32 +303,9 @@ Enabling higher-order and functional programming patterns.
 
 ---
 
-## Phase 7 — Associations & Structured Data
+## Phase 7 — File I/O & System
 
-| Builtin | Signature | Description |
-|---------|-----------|-------------|
-| `Association` | `Association[k1->v1, ...]` | Create association |
-| `Key` | `Key["name"]` | Key accessor |
-| `Keys` | `Keys[assoc]` | List keys |
-| `Values` | `Values[assoc]` | List values |
-| `Lookup` | `Lookup[assoc, key]` | Safe key access |
-| `KeyExistsQ` | `KeyExistsQ[assoc, key]` | Key exists? |
-| `KeyTake` | `KeyTake[assoc, keys]` | Extract keys |
-| `KeyDrop` | `KeyDrop[assoc, keys]` | Remove keys |
-| `KeySort` | `KeySort[assoc]` | Sort by key |
-| `KeySelect` | `KeySelect[assoc, test]` | Filter by key |
-| `Merge` | `Merge[assoc1, assoc2]` | Merge associations |
-| `GroupBy` | `GroupBy[list, f]` | Group elements |
-| `Counts` | `Counts[list]` | Element counts |
-| `Tally` | `Tally[list]` | Element tallies |
-| `Gather` | `Gather[list, test]` | Group by equality |
-| `GatherBy` | `GatherBy[list, f]` | Group by function |
-
----
-
-## Phase 8 — File I/O & System
-
-### 8.1 — File Operations
+### 7.1 — File Operations
 
 | Builtin | Signature | Description |
 |---------|-----------|-------------|
@@ -323,7 +321,7 @@ Enabling higher-order and functional programming patterns.
 | `Print` | `Print[expr]` | Print to stdout |
 | `Input` | `Input["prompt"]` | Read from stdin |
 
-### 8.2 — System Functions
+### 7.2 — System Functions
 
 | Builtin | Description |
 |---------|-------------|
@@ -339,7 +337,7 @@ Enabling higher-order and functional programming patterns.
 
 ---
 
-## Phase 9 — Parsing & Syntax
+## Phase 8 — Parsing & Syntax
 
 A lexer and parser for `.mm` syntax:
 
@@ -366,7 +364,7 @@ Expression(Plus, 1, 2)
 
 ---
 
-## Phase 10 — Performance & Polish
+## Phase 9 — Performance & Polish
 
 | Feature | Description |
 |---------|-------------|
@@ -383,14 +381,14 @@ Expression(Plus, 1, 2)
 
 ## Milestones
 
-| Milestone | Phase | What It Unlocks |
-|-----------|-------|-----------------|
-| **v0.2.0 — Usable** | 1 + 1.4 | Conditional logic, list processing, basic programs |
-| **v0.3.0 — Functional** | 2 | Higher-order programming, pure functions |
-| **v0.4.0 — Text** | 3 | String processing, serialization |
-| **v0.5.0 — Math** | 4 | Scientific computing, numeric algorithms |
-| **v0.6.0 — Meta** | 5 | Metaprogramming, code generation |
-| **v0.7.0 — Robust** | 6 | Error handling, resource management |
-| **v0.8.0 — Data** | 7 | Structured data, JSON-like objects |
-| **v0.9.0 — System** | 8 | File I/O, system integration |
-| **v1.0.0 — Complete** | 9 + 10 | Parser, syntax, performance, polish |
+| Milestone | What It Unlocks |
+|-----------|-----------------|
+| **v0.1.0 — Usable** | Conditional logic, list processing, basic programs |
+| **v0.2.0 — Functional** | Higher-order programming, pure functions |
+| **v0.3.0 — Text** | String processing, serialization |
+| **v0.4.0 — Math** | Scientific computing, numeric algorithms |
+| **v0.5.0 — Meta** | Metaprogramming, code generation |
+| **v0.6.0 — Robust** | Error handling, resource management |
+| **v0.7.0 — System** | File I/O, system integration |
+| **v0.8.0 — Language** | Parser, syntax |
+| **v0.9.0 — Complete** | performance, polish |
